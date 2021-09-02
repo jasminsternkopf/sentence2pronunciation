@@ -1,5 +1,5 @@
 import re
-from typing import Dict, List, Set, Tuple
+from typing import Callable, Dict, List, Set, Tuple
 
 Pronun = Tuple[str, ...]
 Pronun_Dict = Dict[str, Pronun]
@@ -9,20 +9,20 @@ def sentence2pronunciaton(sentence: str, dict: Pronun_Dict, trim_symb: Set[str],
   pass
 
 
-def word2pronunciation(word: str, dict: Pronun_Dict, trim_symb: Set[str], split_on_hyphen: bool) -> Pronun:
+def word2pronunciation(word: str, trim_symb: Set[str], split_on_hyphen: bool, get_pronun: Callable[[str], Pronun]) -> Pronun:
   trim_beginning, act_word, trim_end = trim_word(word, trim_symb)
   pronuns = [(trim_beginning,)]
   if split_on_hyphen:
     splitted_words = act_word.split("-")
     for index, single_word in enumerate(splitted_words):
-      pronuns.append(get_pronun(single_word, dict, "-"))
+      pronuns.append(get_pronun(single_word))
       if index != len(splitted_words) - 1:
-        pronuns.append(("-"))
+        pronuns.append(("-",))
   else:
-    pronuns.append(get_pronun(act_word, dict, "-"))
+    pronuns.append(get_pronun(act_word))
   pronuns.append((trim_end,))
   complete_pronun = pronunlist_to_pronun(pronuns)
-  return complete_pronun  # - einfügen
+  return complete_pronun
 
 
 def trim_word(word: str, trim_symb: Set[str]) -> Tuple[str, str, str]:
@@ -39,10 +39,10 @@ def trim_word(word: str, trim_symb: Set[str]) -> Tuple[str, str, str]:
   return beginning, act_word, end
 
 
-def get_pronun(word: str, dict: Pronun_Dict, replace_unknown_with) -> Pronun:
-  if word in dict.keys():
-    return dict[word]
-  return replace_unknown_with * len(word)
+# def get_pronun(word: str, dict: Pronun_Dict, replace_unknown_with) -> Pronun:
+#  if word in dict.keys():
+#    return dict[word]
+#  return replace_unknown_with * len(word)
 
 
 def pronunlist_to_pronun(pronunlist: List[Pronun]) -> Pronun:
