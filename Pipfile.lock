@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1bd71dad3049000b5177366bca18f2b0e1df407881d71ca9e74cc0ffff2e26bd"
+            "sha256": "a4ce6ce0deeeb449a27dd56f3d94566802f96332c5b172c07edec6776ae9ad13"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -154,6 +154,10 @@
             ],
             "index": "pypi",
             "version": "==6.2.5"
+        },
+        "sentence2pronunciation": {
+            "editable": true,
+            "path": "."
         },
         "toml": {
             "hashes": [

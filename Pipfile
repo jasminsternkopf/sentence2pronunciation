@@ -11,6 +11,7 @@ pylint = "*"
 pycodestyle = "*"
 isort = "*"
 pytest = "*"
+sentence2pronunciation = {editable = true, path = "."}
 
 [requires]
 python_version = "3.8"
