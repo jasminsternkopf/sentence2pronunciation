@@ -91,121 +91,121 @@ def test_trim_word_trimsymbs_in_between_and_after():
 # region word2pronunciation
 
 
-def test_word2pronunciation__no_hyphen__split_on_hyphen_false__get_pronun_identity_but_as_tuple():
-  word = "!?%(hallo)#"
-  trim_symb = {"!", "?", "(", ")", "#", "%"}
+HYPHEN = "-"
+
+
+def get_pronun(x):
+  return (x,)
+
+
+def test_word2pronunciation__no_hyphen__split_on_hyphen_false():
+  word = "!(hallo!"
+  trim_symb = {"!", "("}
   split_on_hyphen = False
-  def get_pronun(x): return (x,)
   res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
-  assert res == ("!?%(", "hallo", ")#")
+  assert res == ("!(", "hallo", "!")
 
 
-def test_word2pronunciation__no_hyphen__split_on_hyphen_false__get_pronun_splits_in_half():
-  word = "!?%(hallo)#"
-  trim_symb = {"!", "?", "(", ")", "#", "%"}
-  split_on_hyphen = False
-  def get_pronun(x): return (x[:int(len(x) / 2)], x[int(len(x) / 2):]) if len(x) > 1 else (x,)
+def test_word2pronunciation__no_hyphen__split_on_hyphen_true():
+  word = "!(hallo!"
+  trim_symb = {"!", "("}
+  split_on_hyphen = True
   res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
-  assert res == ("!?%(", "ha", "llo", ")#")
+  assert res == ("!(", "hallo", "!")
 
 
-def test_word2pronunciation__no_hyphen__split_on_hyphen_true__get_pronun_identity_but_as_tuple():
-  word = "!?%(hallo)#"
+def test_word2pronunciation__one_hyphen__split_on_hyphen_false():
+  word = "!(hal-lo!"
+  trim_symb = {"!", "("}
+  split_on_hyphen = False
+  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+
+  assert res == ("!(", "hal-lo", "!")
+
+
+def test_word2pronunciation__one_hyphen__split_on_hyphen_true():
+  word = "!(hal-lo!"
+  trim_symb = {"!", "("}
+  split_on_hyphen = True
+  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+
+  assert res == ("!(", "hal", HYPHEN, "lo", "!")
+
+##
+
+
+def test_word2pronunciation__no_hyphen__split_on_hyphen_false__no_trim_at_beginning():
+  word = "hallo!"
+  trim_symb = {"!", "("}
+  split_on_hyphen = False
+  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+
+  assert res == ("hallo", "!")
+
+
+def test_word2pronunciation__no_hyphen__split_on_hyphen_true__no_trim_at_beginning():
+  word = "hallo!"
+  trim_symb = {"!", "("}
+  split_on_hyphen = True
+  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+
+  assert res == ("hallo", "!")
+
+
+def test_word2pronunciation__one_hyphen__split_on_hyphen_false__no_trim_at_beginning():
+  word = "hal-lo!"
+  trim_symb = {"!", "("}
+  split_on_hyphen = False
+  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+
+  assert res == ("hal-lo", "!")
+
+
+def test_word2pronunciation__one_hyphen__split_on_hyphen_true__no_trim_at_beginning():
+  word = "hal-lo!"
+  trim_symb = {"!", "("}
+  split_on_hyphen = True
+  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+
+  assert res == ("hal", HYPHEN, "lo", "!")
+
+##
+
+
+def test_word2pronunciation__two_hyphen__split_on_hyphen_false__no_trim_at_beginning():
+  word = "ha-ll-o!"
+  trim_symb = {"!", "("}
+  split_on_hyphen = False
+  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+
+  assert res == ("!(", "ha-ll-o", "!")
+
+
+def test_word2pronunciation__two_hyphen__split_on_hyphen_true():
+  word = "ha-ll-o!"
+  trim_symb = {"!", "("}
+  split_on_hyphen = True
+
+  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+
+  assert res == ("!(", "ha", HYPHEN, "ll", HYPHEN, "o", "!")
+
+
+def test_word2pronunciation_no_trim_in_beginning():
+  word = "ha-ll-o!"
+  trim_symb = {"!", "("}
+  split_on_hyphen = True
+  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+
+  assert res == ("h", "a", HYPHEN, "l", "l", HYPHEN, "o", ")#")
+
+
+def test_word2pronunciation_no_trim_in_end():
+  word = "!?%(ha-ll-o"
   trim_symb = {"!", "?", "(", ")", "#", "%"}
   split_on_hyphen = True
-  def get_pronun(x): return (x,)
   res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
-  assert res == ("!?%(", "hallo", ")#")
-
-
-def test_word2pronunciation__no_hyphen__split_on_hyphen_true__get_pronun_splits_in_half():
-  word = "!?%(hallo)#"
-  trim_symb = {"!", "?", "(", ")", "#", "%"}
-  split_on_hyphen = True
-  def get_pronun(x): return (x[:int(len(x) / 2)], x[int(len(x) / 2):]) if len(x) > 1 else (x,)
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
-
-  assert res == ("!?%(", "ha", "llo", ")#")
-
-
-def test_word2pronunciation__one_hyphen__split_on_hyphen_false__get_pronun_identity_but_as_tuple():
-  word = "!?%(hal-lo)#"
-  trim_symb = {"!", "?", "(", ")", "#", "%"}
-  split_on_hyphen = False
-  def get_pronun(x): return (x,)
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
-
-  assert res == ("!?%(", "hal-lo", ")#")
-
-
-def test_word2pronunciation__one_hyphen__split_on_hyphen_false__get_pronun_splits_in_half():
-  word = "!?%(hal-lo)#"
-  trim_symb = {"!", "?", "(", ")", "#", "%"}
-  split_on_hyphen = False
-  def get_pronun(x): return (x[:int(len(x) / 2)], x[int(len(x) / 2):]) if len(x) > 1 else (x,)
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
-
-  assert res == ("!?%(", "hal", "-lo", ")#")
-
-
-def test_word2pronunciation__one_hyphen__split_on_hyphen_true__get_pronun_identity_but_as_tuple():
-  word = "!?%(hal-lo)#"
-  trim_symb = {"!", "?", "(", ")", "#", "%"}
-  split_on_hyphen = True
-  def get_pronun(x): return (x,)
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
-
-  assert res == ("!?%(", "hal", "-", "lo", ")#")
-
-
-def test_word2pronunciation__one_hyphen__split_on_hyphen_true__get_pronun_splits_in_half():
-  word = "!?%(hal-lo)#"
-  trim_symb = {"!", "?", "(", ")", "#", "%"}
-  split_on_hyphen = True
-  def get_pronun(x): return (x[:int(len(x) / 2)], x[int(len(x) / 2):]) if len(x) > 1 else (x,)
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
-
-  assert res == ("!?%(", "h", "al", "-", "l", "o", ")#")
-
-
-def test_word2pronunciation__two_hyphen__split_on_hyphen_false__get_pronun_identity_but_as_tuple():
-  word = "!?%(ha-ll-o)#"
-  trim_symb = {"!", "?", "(", ")", "#", "%"}
-  split_on_hyphen = False
-  def get_pronun(x): return (x,)
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
-
-  assert res == ("!?%(", "ha-ll-o", ")#")
-
-
-def test_word2pronunciation__two_hyphen__split_on_hyphen_false__get_pronun_splits_in_half():
-  word = "!?%(ha-ll-o)#"
-  trim_symb = {"!", "?", "(", ")", "#", "%"}
-  split_on_hyphen = False
-  def get_pronun(x): return (x[:int(len(x) / 2)], x[int(len(x) / 2):]) if len(x) > 1 else (x,)
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
-
-  assert res == ("!?%(", "ha-", "ll-o", ")#")
-
-
-def test_word2pronunciation__two_hyphen__split_on_hyphen_true__get_pronun_identity_but_as_tuple():
-  word = "!?%(ha-ll-o)#"
-  trim_symb = {"!", "?", "(", ")", "#", "%"}
-  split_on_hyphen = True
-  def get_pronun(x): return (x,)
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
-
-  assert res == ("!?%(", "ha", "-", "ll", "-", "o", ")#")
-
-
-def test_word2pronunciation__two_hyphen__split_on_hyphen_true__get_pronun_splits_in_half():
-  word = "!?%(ha-ll-o)#"
-  trim_symb = {"!", "?", "(", ")", "#", "%"}
-  split_on_hyphen = True
-  def get_pronun(x): return (x[:int(len(x) / 2)], x[int(len(x) / 2):]) if len(x) > 1 else (x,)
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
-
-  assert res == ("!?%(", "h", "a", "-", "l", "l", "-", "o", ")#")
+  assert res == ("h", "a", HYPHEN, "l", "l", HYPHEN, "o", ")#")

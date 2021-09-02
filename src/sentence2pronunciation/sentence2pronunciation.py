@@ -12,17 +12,21 @@ def sentence2pronunciaton(sentence: str, dict: Pronun_Dict, trim_symb: Set[str],
 def word2pronunciation(word: str, trim_symb: Set[str], split_on_hyphen: bool, get_pronun: Callable[[str], Pronun]) -> Pronun:
   trim_beginning, act_word, trim_end = trim_word(word, trim_symb)
   pronuns = [(trim_beginning,)]
+  add_pronun_for_word(pronuns, act_word, split_on_hyphen, get_pronun)
+  pronuns.append((trim_end,))
+  complete_pronun = pronunlist_to_pronun(pronuns)
+  return complete_pronun
+
+
+def add_pronun_for_word(pronuns: List[Pronun], word: str, split_on_hyphen: bool, get_pronun: Callable[[str], Pronun]) -> None:
   if split_on_hyphen:
-    splitted_words = act_word.split("-")
+    splitted_words = word.split("-")
     for index, single_word in enumerate(splitted_words):
       pronuns.append(get_pronun(single_word))
       if index != len(splitted_words) - 1:
         pronuns.append(("-",))
   else:
-    pronuns.append(get_pronun(act_word))
-  pronuns.append((trim_end,))
-  complete_pronun = pronunlist_to_pronun(pronuns)
-  return complete_pronun
+    pronuns.append(get_pronun(word))
 
 
 def trim_word(word: str, trim_symb: Set[str]) -> Tuple[str, str, str]:
@@ -48,5 +52,6 @@ def trim_word(word: str, trim_symb: Set[str]) -> Tuple[str, str, str]:
 def pronunlist_to_pronun(pronunlist: List[Pronun]) -> Pronun:
   for ele in pronunlist:
     assert isinstance(ele, tuple)
-  flattened_pronunlist = [pronun for pronuntuple in pronunlist for pronun in pronuntuple]
+  flattened_pronunlist = [
+    pronun for pronuntuple in pronunlist for pronun in pronuntuple if pronun != ""]
   return tuple(flattened_pronunlist)
