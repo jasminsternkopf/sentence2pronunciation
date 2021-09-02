@@ -8,20 +8,23 @@ Pronun_Dict = Dict[str, Pronun]
 def sentence2pronunciaton(sentence: str, trim_symb: Set[str], split_on_hyphen: bool, get_pronun: Callable[[str], Pronun], cons_annotation: bool, annotation_split_symbol: Optional[str] = None) -> Pronun:
   words = sentence.split(" ")
   pronuns = []
-  for index, word in enumerate(words):
-    if cons_annotation and is_annotation(word, annotation_split_symbol):
-      annotations = annotation2pronunciation(word, annotation_split_symbol)
-      pronuns.append(annotations)
-    else:
-      new_pronun = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
-      pronuns.append(new_pronun)
-    if index != len(words) - 1:
-      pronuns.append((" ",))
-  complete_pronun = pronunlist_to_pronun(pronuns)
+  for word in words:
+    word_or_annotation2pronunciation(
+      word, pronuns, trim_symb, split_on_hyphen, get_pronun, cons_annotation, annotation_split_symbol)
+  # -1 because there is one unneccessary space at the end
+  complete_pronun = pronunlist_to_pronun(pronuns[:-1])
   return complete_pronun
 
-def word_or_annotation2pronunciation():
-  pass
+
+def word_or_annotation2pronunciation(word: str, pronuns: List[Pronun], trim_symb: Set[str], split_on_hyphen: bool, get_pronun: Callable[[str], Pronun], cons_annotation: bool, annotation_split_symbol: Optional[str] = None) -> None:
+  if cons_annotation and is_annotation(word, annotation_split_symbol):
+    annotations = annotation2pronunciation(word, annotation_split_symbol)
+    pronuns.append(annotations)
+  else:
+    new_pronun = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+    pronuns.append(new_pronun)
+  pronuns.append((" ",))
+
 
 def is_annotation(word: str, annotation_split_symbol: str) -> bool:
   annot = re.compile(rf"{annotation_split_symbol}[\S]+{annotation_split_symbol}\Z")
