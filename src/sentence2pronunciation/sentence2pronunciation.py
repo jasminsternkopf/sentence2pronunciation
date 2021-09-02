@@ -1,12 +1,39 @@
 import re
-from typing import Callable, Dict, List, Set, Tuple
+from typing import Callable, Dict, List, Optional, Set, Tuple
 
 Pronun = Tuple[str, ...]
 Pronun_Dict = Dict[str, Pronun]
 
 
-def sentence2pronunciaton(sentence: str, dict: Pronun_Dict, trim_symb: Set[str], split_on_hyphen: bool) -> Pronun:
+def sentence2pronunciaton(sentence: str, trim_symb: Set[str], split_on_hyphen: bool, get_pronun: Callable[[str], Pronun], cons_annotation: bool, annotation_split_symbol: Optional[str] = None) -> Pronun:
+  words = sentence.split(" ")
+  pronuns = []
+  for index, word in enumerate(words):
+    if cons_annotation and is_annotation(word, annotation_split_symbol):
+      annotations = annotation2pronunciation(word, annotation_split_symbol)
+      pronuns.append(annotations)
+    else:
+      new_pronun = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+      pronuns.append(new_pronun)
+    if index != len(words) - 1:
+      pronuns.append((" ",))
+  complete_pronun = pronunlist_to_pronun(pronuns)
+  return complete_pronun
+
+def word_or_annotation2pronunciation():
   pass
+
+def is_annotation(word: str, annotation_split_symbol: str) -> bool:
+  annot = re.compile(rf"{annotation_split_symbol}[\S]+{annotation_split_symbol}\Z")
+  poss_annot = annot.match(word)
+  return not(poss_annot is None)
+
+
+def annotation2pronunciation(annot: str, annotation_split_symbol: str) -> Pronun:
+  assert is_annotation(annot, annotation_split_symbol)
+  single_annots = re.findall(rf"[^{annotation_split_symbol}]+", annot)
+  single_annots = tuple(single_annots)
+  return single_annots
 
 
 def word2pronunciation(word: str, trim_symb: Set[str], split_on_hyphen: bool, get_pronun: Callable[[str], Pronun]) -> Pronun:
