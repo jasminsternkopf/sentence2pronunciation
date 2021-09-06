@@ -6,6 +6,8 @@ Pronun_Dict = Dict[str, Pronun]
 
 
 def sentence2pronunciaton(sentence: str, trim_symb: Set[str], split_on_hyphen: bool, get_pronun: Callable[[str], Pronun], cons_annotation: bool, annotation_split_symbol: Optional[str] = None) -> Pronun:
+  if cons_annotation and len(annotation_split_symbol) != 1:
+    raise ValueError("annotation_split_symbol has to be a string of length 1.")
   words = sentence.split(" ")
   pronuns = []
   for word in words:
