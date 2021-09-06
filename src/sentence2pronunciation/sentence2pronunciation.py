@@ -1,11 +1,13 @@
 import re
 from typing import Callable, Dict, List, Optional, Set, Tuple
 
-Pronunciation = Tuple[str, ...]
-Pronunciation_Dict = Dict[str, Pronunciation]
+Symbol = str
+Pronunciation = Tuple[Symbol, ...]
+#Pronunciation_Dict = Dict[str, Pronunciation]
+HYPHEN = "-"
 
 
-def sentence2pronunciaton(sentence: str, trim_symb: Set[str], split_on_hyphen: bool, get_pronun: Callable[[str], Pronunciation], cons_annotation: bool, annotation_split_symbol: Optional[str] = None) -> Pronunciation:
+def sentence2pronunciaton(sentence: str, trim_symb: Set[Symbol], split_on_hyphen: bool, get_pronun: Callable[[str], Pronunciation], cons_annotation: bool, annotation_split_symbol: Optional[Symbol]) -> Pronunciation:
   if cons_annotation and len(annotation_split_symbol) != 1:
     raise ValueError("annotation_split_symbol has to be a string of length 1.")
   words = sentence.split(" ")
@@ -20,7 +22,11 @@ def sentence2pronunciaton(sentence: str, trim_symb: Set[str], split_on_hyphen: b
   return complete_pronun
 
 
-def word2pronunciation(word: str, trim_symb: Set[str], split_on_hyphen: bool, get_pronun: Callable[[str], Pronunciation], cons_annotation: bool, annotation_split_symbol: Optional[str] = None) -> Pronunciation:
+def new_pronuns_and_char(word: str):
+  pass
+
+
+def word2pronunciation(word: str, trim_symb: Set[Symbol], split_on_hyphen: bool, get_pronun: Callable[[str], Pronunciation], cons_annotation: bool, annotation_split_symbol: Optional[Symbol]) -> Pronunciation:
   if cons_annotation and len(annotation_split_symbol) != 1:
     raise ValueError("annotation_split_symbol has to be a string of length 1.")
   if cons_annotation and is_annotation(word, annotation_split_symbol):
@@ -30,21 +36,21 @@ def word2pronunciation(word: str, trim_symb: Set[str], split_on_hyphen: bool, ge
   return new_pronun
 
 
-def is_annotation(word: str, annotation_split_symbol: str) -> bool:
+def is_annotation(word: str, annotation_split_symbol: Symbol) -> bool:
   assert len(annotation_split_symbol) == 1
   annot = re.compile(rf"{annotation_split_symbol}[\S]+{annotation_split_symbol}\Z")
   poss_annot = annot.match(word)
-  return not(poss_annot is None)
+  return poss_annot is not None
 
 
-def annotation2pronunciation(annot: str, annotation_split_symbol: str) -> Pronunciation:
+def annotation2pronunciation(annot: str, annotation_split_symbol: Symbol) -> Pronunciation:
   assert is_annotation(annot, annotation_split_symbol)
   single_annots = re.findall(rf"[^{annotation_split_symbol}]+", annot)
   single_annots = tuple(single_annots)
   return single_annots
 
 
-def not_annot_word2pronunciation(word: str, trim_symb: Set[str], split_on_hyphen: bool, get_pronun: Callable[[str], Pronunciation]) -> Pronunciation:
+def not_annot_word2pronunciation(word: str, trim_symb: Set[Symbol], split_on_hyphen: bool, get_pronun: Callable[[str], Pronunciation]) -> Pronunciation:
   trim_beginning, act_word, trim_end = trim_word(word, trim_symb)
   pronuns = [(trim_beginning,)]
   add_pronun_for_word(pronuns, act_word, split_on_hyphen, get_pronun)
@@ -55,23 +61,23 @@ def not_annot_word2pronunciation(word: str, trim_symb: Set[str], split_on_hyphen
 
 def add_pronun_for_word(pronuns: List[Pronunciation], word: str, split_on_hyphen: bool, get_pronun: Callable[[str], Pronunciation]) -> None:
   if split_on_hyphen:
-    splitted_words = word.split("-")
+    splitted_words = word.split(HYPHEN)
     for index, single_word in enumerate(splitted_words):
       pronuns.append(get_pronun(single_word))
       if index != len(splitted_words) - 1:
-        pronuns.append(("-",))
+        pronuns.append((HYPHEN,))
   else:
     pronuns.append(get_pronun(word))
 
 
-def trim_word(word: str, trim_symb: Set[str]) -> Tuple[str, str, str]:
+def trim_word(word: str, trim_symb: Set[Symbol]) -> Tuple[str, str, str]:
   trim_symb_single_str = "".join(str(symb) for symb in trim_symb)
   trim = re.compile(rf"[{trim_symb_single_str}]*")
   beginning = trim.match(word).group(0)
   reverse_word = word[::-1]
   end = trim.match(reverse_word).group(0)
   end = end[::-1]
-  if end != "":
+  if len(end) > 0:
     act_word = word[len(beginning):-len(end)]
   else:
     act_word = word[len(beginning):]
@@ -87,6 +93,6 @@ def trim_word(word: str, trim_symb: Set[str]) -> Tuple[str, str, str]:
 def pronunlist_to_pronun(pronunlist: List[Pronunciation]) -> Pronunciation:
   for ele in pronunlist:
     assert isinstance(ele, tuple)
-  flattened_pronunlist = [
-    pronun for pronuntuple in pronunlist for pronun in pronuntuple if pronun != ""]
-  return tuple(flattened_pronunlist)
+  flattened_pronunlist = tuple(
+    pronun for pronuntuple in pronunlist for pronun in pronuntuple if pronun != "")
+  return flattened_pronunlist
