@@ -1,8 +1,11 @@
+import pytest
 from sentence2pronunciation.sentence2pronunciation import (
-    add_pronun_for_word, annotation2pronunciation, is_annotation, pronunlist_to_pronun, trim_word,
+    add_pronun_for_word, annotation2pronunciation, is_annotation,
+    not_annot_word2pronunciation, pronunlist_to_pronun, trim_word,
     word2pronunciation)
 
 HYPHEN = "-"
+
 
 def get_pronun(x):
   return (x,)
@@ -96,6 +99,7 @@ def test_trim_word_trimsymbs_in_between_and_after():
 
 # region add_pronun_for_word
 
+
 def test_add_pronun_for_word_no_hyphen__split_on_hyphen_false():
   word = "hello"
   split_on_hyphen = False
@@ -103,6 +107,7 @@ def test_add_pronun_for_word_no_hyphen__split_on_hyphen_false():
   add_pronun_for_word(pronuns, word, split_on_hyphen, get_pronun)
 
   assert pronuns == [("hello",)]
+
 
 def test_add_pronun_for_word_no_hyphen__split_on_hyphen_true():
   word = "hello"
@@ -112,6 +117,7 @@ def test_add_pronun_for_word_no_hyphen__split_on_hyphen_true():
 
   assert pronuns == [("hello",)]
 
+
 def test_add_pronun_for_word_one_hyphen__split_on_hyphen_false():
   word = "hel-lo"
   split_on_hyphen = False
@@ -120,6 +126,7 @@ def test_add_pronun_for_word_one_hyphen__split_on_hyphen_false():
 
   assert pronuns == [("hel-lo",)]
 
+
 def test_add_pronun_for_word_one_hyphen__split_on_hyphen_true():
   word = "hel-lo"
   split_on_hyphen = True
@@ -127,6 +134,7 @@ def test_add_pronun_for_word_one_hyphen__split_on_hyphen_true():
   add_pronun_for_word(pronuns, word, split_on_hyphen, get_pronun)
 
   assert pronuns == [("hel",), (HYPHEN,), ("lo",)]
+
 
 def test_add_pronun_for_word_two_hyphens__split_on_hyphen_true():
   word = "he-ll-o"
@@ -138,175 +146,170 @@ def test_add_pronun_for_word_two_hyphens__split_on_hyphen_true():
 
   # endregion
 
-# region word2pronunciation
+# region not_annot_word2pronunciation
 
-def test_word2pronunciation__no_hyphen__split_on_hyphen_false():
+
+def test_not_annot_word2pronunciation__no_hyphen__split_on_hyphen_false():
   word = "!(hello!"
   trim_symb = {"!", "("}
   split_on_hyphen = False
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  res = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
   assert res == ("!(", "hello", "!")
 
 
-def test_word2pronunciation__no_hyphen__split_on_hyphen_true():
+def test_not_annot_word2pronunciation__no_hyphen__split_on_hyphen_true():
   word = "!(hello!"
   trim_symb = {"!", "("}
   split_on_hyphen = True
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  res = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
   assert res == ("!(", "hello", "!")
 
 
-def test_word2pronunciation__one_hyphen__split_on_hyphen_false():
+def test_not_annot_word2pronunciation__one_hyphen__split_on_hyphen_false():
   word = "!(hel-lo!"
   trim_symb = {"!", "("}
   split_on_hyphen = False
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  res = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
   assert res == ("!(", "hel-lo", "!")
 
 
-def test_word2pronunciation__one_hyphen__split_on_hyphen_true():
+def test_not_annot_word2pronunciation__one_hyphen__split_on_hyphen_true():
   word = "!(hel-lo!"
   trim_symb = {"!", "("}
   split_on_hyphen = True
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  res = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
   assert res == ("!(", "hel", HYPHEN, "lo", "!")
 
 
-def test_word2pronunciation__two_hyphen__split_on_hyphen_false_():
+def test_not_annot_word2pronunciation__two_hyphen__split_on_hyphen_false_():
   word = "!(he-ll-o!"
   trim_symb = {"!", "("}
   split_on_hyphen = False
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  res = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
   assert res == ("!(", "he-ll-o", "!")
 
 
-def test_word2pronunciation__two_hyphen__split_on_hyphen_true():
+def test_not_annot_word2pronunciation__two_hyphen__split_on_hyphen_true():
   word = "!(he-ll-o!"
   trim_symb = {"!", "("}
   split_on_hyphen = True
 
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  res = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
   assert res == ("!(", "he", HYPHEN, "ll", HYPHEN, "o", "!")
 
 
-def test_word2pronunciation__no_hyphen__split_on_hyphen_false__no_trim_at_beginning():
+def test_not_annot_word2pronunciation__no_hyphen__split_on_hyphen_false__no_trim_at_beginning():
   word = "hello!"
   trim_symb = {"!", "("}
   split_on_hyphen = False
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  res = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
   assert res == ("hello", "!")
 
 
-def test_word2pronunciation__no_hyphen__split_on_hyphen_true__no_trim_at_beginning():
+def test_not_annot_word2pronunciation__no_hyphen__split_on_hyphen_true__no_trim_at_beginning():
   word = "hello!"
   trim_symb = {"!", "("}
   split_on_hyphen = True
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  res = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
   assert res == ("hello", "!")
 
 
-def test_word2pronunciation__one_hyphen__split_on_hyphen_false__no_trim_at_beginning():
+def test_not_annot_word2pronunciation__one_hyphen__split_on_hyphen_false__no_trim_at_beginning():
   word = "hel-lo!"
   trim_symb = {"!", "("}
   split_on_hyphen = False
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  res = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
   assert res == ("hel-lo", "!")
 
 
-def test_word2pronunciation__one_hyphen__split_on_hyphen_true__no_trim_at_beginning():
+def test_not_annot_word2pronunciation__one_hyphen__split_on_hyphen_true__no_trim_at_beginning():
   word = "hel-lo!"
   trim_symb = {"!", "("}
   split_on_hyphen = True
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  res = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
   assert res == ("hel", HYPHEN, "lo", "!")
 
 
-def test_word2pronunciation__no_hyphen__split_on_hyphen_false__no_trim_at_end():
+def test_not_annot_word2pronunciation__no_hyphen__split_on_hyphen_false__no_trim_at_end():
   word = "!hello"
   trim_symb = {"!", "("}
   split_on_hyphen = False
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  res = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
   assert res == ("!", "hello")
 
 
-def test_word2pronunciation__no_hyphen__split_on_hyphen_true__no_trim_at_end():
+def test_not_annot_word2pronunciation__no_hyphen__split_on_hyphen_true__no_trim_at_end():
   word = "!hello"
   trim_symb = {"!", "("}
   split_on_hyphen = True
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  res = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
   assert res == ("!", "hello")
 
 
-def test_word2pronunciation__one_hyphen__split_on_hyphen_false__no_trim_at_end():
+def test_not_annot_word2pronunciation__one_hyphen__split_on_hyphen_false__no_trim_at_end():
   word = "!hel-lo"
   trim_symb = {"!", "("}
   split_on_hyphen = False
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  res = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
   assert res == ("!", "hel-lo")
 
 
-def test_word2pronunciation__one_hyphen__split_on_hyphen_true__no_trim_at_end():
+def test_not_annot_word2pronunciation__one_hyphen__split_on_hyphen_true__no_trim_at_end():
   word = "!hel-lo"
   trim_symb = {"!", "("}
   split_on_hyphen = True
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  res = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
   assert res == ("!", "hel", HYPHEN, "lo")
 
 
-def test_word2pronunciation__no_hyphen__split_on_hyphen_false__no_trim_at_beginning_and_end():
+def test_not_annot_word2pronunciation__no_hyphen__split_on_hyphen_false__no_trim_at_beginning_and_end():
   word = "hello"
   trim_symb = {"!", "("}
   split_on_hyphen = False
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  res = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
   assert res == ("hello",)
 
 
-def test_word2pronunciation__no_hyphen__split_on_hyphen_true__no_trim_at_beginning_and_end():
+def test_not_annot_word2pronunciation__no_hyphen__split_on_hyphen_true__no_trim_at_beginning_and_end():
   word = "hello"
   trim_symb = {"!", "("}
   split_on_hyphen = True
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  res = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
   assert res == ("hello",)
 
 
-def test_word2pronunciation__one_hyphen__split_on_hyphen_false__no_trim_at_beginning_and_end():
+def test_not_annot_word2pronunciation__one_hyphen__split_on_hyphen_false__no_trim_at_beginning_and_end():
   word = "hel-lo"
   trim_symb = {"!", "("}
   split_on_hyphen = False
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  res = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
   assert res == ("hel-lo",)
 
 
-def test_word2pronunciation__one_hyphen__split_on_hyphen_true__no_trim_at_beginning_and_end():
+def test_not_annot_word2pronunciation__one_hyphen__split_on_hyphen_true__no_trim_at_beginning_and_end():
   word = "hel-lo"
   trim_symb = {"!", "("}
   split_on_hyphen = True
-  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  res = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
 
   assert res == ("hel", HYPHEN, "lo")
-
-# endregion
-
-# region add_pronun_for_word
-
-# def test_add_pronun_for_word__
 
 # endregion
 
@@ -381,4 +384,99 @@ def test_annotation2pronunciation_double_annotation_split_symbol_at_end():
 
 # endregion
 
-# region word_or_annotation2pronunciation
+# region word2pronunciation
+
+
+def test_word2pronunciaton__cons_annotation_is_false__word_is_not_annot():
+  cons_annotation = False
+  word = "hello"
+  trim_symb = {"!"}
+  split_on_hyphen = False
+  annotation_split_symbol = "/"
+
+  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun,
+                           cons_annotation, annotation_split_symbol)
+
+  assert res == ("hello",)
+
+
+def test_word2pronunciaton__cons_annotation_is_false__word_is_annot():
+  cons_annotation = False
+  word = "/hello/"
+  trim_symb = {"!"}
+  split_on_hyphen = False
+  annotation_split_symbol = "/"
+
+  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun,
+                           cons_annotation, annotation_split_symbol)
+
+  assert res == ("/hello/",)
+
+
+def test_word2pronunciaton__cons_annotation_is_true__word_is_annot():
+  cons_annotation = True
+  word = "/hello/"
+  trim_symb = {"!"}
+  split_on_hyphen = False
+  annotation_split_symbol = "/"
+
+  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun,
+                           cons_annotation, annotation_split_symbol)
+
+  assert res == ("hello",)
+
+
+def test_word2pronunciaton__cons_annotation_is_true__word_is_not_annot():
+  cons_annotation = True
+  word = "hello"
+  trim_symb = {"!"}
+  split_on_hyphen = False
+  annotation_split_symbol = "/"
+
+  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun,
+                           cons_annotation, annotation_split_symbol)
+
+  assert res == ("hello",)
+
+
+def test_word2pronunciaton__cons_annotation_is_true__annotation_split_symbol_has_len_2():
+  cons_annotation = True
+  word = "/hello/"
+  trim_symb = {"!"}
+  split_on_hyphen = False
+  annotation_split_symbol = "//"
+
+  with pytest.raises(ValueError):
+    word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun,
+                       cons_annotation, annotation_split_symbol)
+
+
+def test_word2pronunciaton__cons_annotation_is_true__annotation_split_symbol_has_len_0():
+  cons_annotation = True
+  word = "/hello/"
+  trim_symb = {"!"}
+  split_on_hyphen = False
+  annotation_split_symbol = ""
+
+  with pytest.raises(ValueError):
+    word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun,
+                       cons_annotation, annotation_split_symbol)
+
+
+def test_word2pronunciaton__cons_annotation_is_true__word_is_annot__annotation_split_symbol_is_also_trim_symbol():
+  cons_annotation = True
+  word = "/hello/"
+  trim_symb = {"/"}
+  split_on_hyphen = False
+  annotation_split_symbol = "/"
+
+  res = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun,
+                           cons_annotation, annotation_split_symbol)
+
+  assert res == ("hello",)
+
+# endregion
+
+# region sentence2pronunciation
+
+#def

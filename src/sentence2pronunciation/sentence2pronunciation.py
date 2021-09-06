@@ -6,29 +6,30 @@ Pronun_Dict = Dict[str, Pronun]
 
 
 def sentence2pronunciaton(sentence: str, trim_symb: Set[str], split_on_hyphen: bool, get_pronun: Callable[[str], Pronun], cons_annotation: bool, annotation_split_symbol: Optional[str] = None) -> Pronun:
-  if cons_annotation and len(annotation_split_symbol) != 1:
-    raise ValueError("annotation_split_symbol has to be a string of length 1.")
   words = sentence.split(" ")
   pronuns = []
   for word in words:
-    word_or_annotation2pronunciation(
-      word, pronuns, trim_symb, split_on_hyphen, get_pronun, cons_annotation, annotation_split_symbol)
+    new_pronun = word2pronunciation(
+      word, pronuns, trim_symb, split_on_hyphen, cons_annotation, annotation_split_symbol)
+    pronuns.append(new_pronun)
+    pronuns.append((" ",))
   # -1 because there is one unneccessary space at the end
   complete_pronun = pronunlist_to_pronun(pronuns[:-1])
   return complete_pronun
 
 
-def word_or_annotation2pronunciation(word: str, pronuns: List[Pronun], trim_symb: Set[str], split_on_hyphen: bool, get_pronun: Callable[[str], Pronun], cons_annotation: bool, annotation_split_symbol: Optional[str] = None) -> None:
+def word2pronunciation(word: str, trim_symb: Set[str], split_on_hyphen: bool, get_pronun: Callable[[str], Pronun], cons_annotation: bool, annotation_split_symbol: Optional[str] = None) -> Pronun:
+  if cons_annotation and len(annotation_split_symbol) != 1:
+    raise ValueError("annotation_split_symbol has to be a string of length 1.")
   if cons_annotation and is_annotation(word, annotation_split_symbol):
     annotations = annotation2pronunciation(word, annotation_split_symbol)
-    pronuns.append(annotations)
-  else:
-    new_pronun = word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
-    pronuns.append(new_pronun)
-  pronuns.append((" ",))
+    return annotations
+  new_pronun = not_annot_word2pronunciation(word, trim_symb, split_on_hyphen, get_pronun)
+  return new_pronun
 
 
 def is_annotation(word: str, annotation_split_symbol: str) -> bool:
+  assert len(annotation_split_symbol) == 1
   annot = re.compile(rf"{annotation_split_symbol}[\S]+{annotation_split_symbol}\Z")
   poss_annot = annot.match(word)
   return not(poss_annot is None)
@@ -41,7 +42,7 @@ def annotation2pronunciation(annot: str, annotation_split_symbol: str) -> Pronun
   return single_annots
 
 
-def word2pronunciation(word: str, trim_symb: Set[str], split_on_hyphen: bool, get_pronun: Callable[[str], Pronun]) -> Pronun:
+def not_annot_word2pronunciation(word: str, trim_symb: Set[str], split_on_hyphen: bool, get_pronun: Callable[[str], Pronun]) -> Pronun:
   trim_beginning, act_word, trim_end = trim_word(word, trim_symb)
   pronuns = [(trim_beginning,)]
   add_pronun_for_word(pronuns, act_word, split_on_hyphen, get_pronun)
