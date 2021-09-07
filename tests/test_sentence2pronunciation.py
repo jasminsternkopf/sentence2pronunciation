@@ -1,5 +1,5 @@
 import pytest
-from sentence2pronunciation.sentence2pronunciation import (
+from sentence2pronunciation.core import (
     add_pronun_for_splitted_word, add_pronun_for_word,
     annotation2pronunciation, is_annotation, not_annot_word2pronunciation,
     pronunlist_to_pronun, sentence2pronunciaton, symbols_join, trim_word, word2pronunciation)

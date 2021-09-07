@@ -89,12 +89,6 @@ def trim_word(word: str, trim_symb: Set[Symbol]) -> Tuple[str, str, str]:
   return beginning, act_word, end
 
 
-# def get_pronun(word: str, dict: Pronun_Dict, replace_unknown_with) -> Pronun:
-#  if word in dict.keys():
-#    return dict[word]
-#  return replace_unknown_with * len(word)
-
-
 def pronunlist_to_pronun(pronunlist: List[Pronunciation]) -> Pronunciation:
   for ele in pronunlist:
     assert isinstance(ele, tuple)
