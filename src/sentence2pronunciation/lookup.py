@@ -11,7 +11,7 @@ def get_eng_g2p() -> G2p:
   return CACHE
 
 
-# def get_pronun(word: str, dict: Pronun_Dict, replace_unknown_with) -> Pronun:
+# def get_pronunciation(word: str, dict: Pronun_Dict, replace_unknown_with) -> Pronun:
 #  if word in dict.keys():
 #    return dict[word]
 #  return replace_unknown_with * len(word)
