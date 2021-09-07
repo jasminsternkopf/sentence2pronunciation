@@ -7,20 +7,6 @@ Pronunciation = Tuple[Symbol, ...]
 HYPHEN = "-"
 
 
-# def sentence2pronunciaton(sentence: str, trim_symb: Set[Symbol], split_on_hyphen: bool, get_pronun: Callable[[str], Pronunciation], cons_annotation: bool, annotation_split_symbol: Optional[Symbol]) -> Pronunciation:
-#   if cons_annotation and len(annotation_split_symbol) != 1:
-#     raise ValueError("annotation_split_symbol has to be a string of length 1.")
-#   words = sentence.split(" ")
-#   pronuns = []
-#   for word in words:
-#     new_pronun = word2pronunciation(
-#       word, pronuns, trim_symb, split_on_hyphen, cons_annotation, annotation_split_symbol)
-#     pronuns.append(new_pronun)
-#     pronuns.append((" ",))
-#   # -1 because there is one unneccessary space at the end
-#   complete_pronun = pronunlist_to_pronun(pronuns[:-1])
-#   return complete_pronun
-
 def sentence2pronunciaton(sentence: str, trim_symb: Set[Symbol], split_on_hyphen: bool, get_pronun: Callable[[str], Pronunciation], cons_annotation: bool, annotation_split_symbol: Optional[Symbol]) -> Pronunciation:
   if cons_annotation and len(annotation_split_symbol) != 1:
     raise ValueError("annotation_split_symbol has to be a string of length 1.")
@@ -28,11 +14,10 @@ def sentence2pronunciaton(sentence: str, trim_symb: Set[Symbol], split_on_hyphen
   pronuns = [word2pronunciation(
       word, trim_symb, split_on_hyphen, get_pronun, cons_annotation, annotation_split_symbol) for word in words]
   complete_pronun = symbols_join(pronuns, " ")
-  complete_pronun = pronunlist_to_pronun(complete_pronun)  # ?
   return complete_pronun
 
 
-def symbols_join(list_of_symbols: List[str], join_symbol: Symbol) -> None:
+def symbols_join(list_of_symbols: List[Pronunciation], join_symbol: Symbol) -> None:
   res = []
   for i, word in enumerate(list_of_symbols):
     res.extend(word)
