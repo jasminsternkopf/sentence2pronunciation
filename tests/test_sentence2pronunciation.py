@@ -155,23 +155,23 @@ def test_trim_word__use_stringpunctuation_as_trim_symbols():
 
 def test_add_pronunciation_for_splitted_word_no_hyphen():
   word = "hello"
-  pronuns = add_pronunciation_for_splitted_word(word, get_pronunciation)
+  pronunciations = add_pronunciation_for_splitted_word(word, get_pronunciation)
 
-  assert pronuns == ("hello",)
+  assert pronunciations == ("hello",)
 
 
 def test_add_pronunciation_for_splitted_word_one_hyphen():
   word = f"hel{HYPHEN}lo"
-  pronuns = add_pronunciation_for_splitted_word(word, get_pronunciation)
+  pronunciations = add_pronunciation_for_splitted_word(word, get_pronunciation)
 
-  assert pronuns == ("hel", HYPHEN, "lo")
+  assert pronunciations == ("hel", HYPHEN, "lo")
 
 
 def test_aadd_pronunciation_for_splitted_word_two_hyphens():
   word = f"he{HYPHEN}ll{HYPHEN}o"
-  pronuns = add_pronunciation_for_splitted_word(word, get_pronunciation)
+  pronunciations = add_pronunciation_for_splitted_word(word, get_pronunciation)
 
-  assert pronuns == ("he", HYPHEN, "ll", HYPHEN, "o")
+  assert pronunciations == ("he", HYPHEN, "ll", HYPHEN, "o")
 
 # endregion
 
@@ -181,17 +181,17 @@ def test_aadd_pronunciation_for_splitted_word_two_hyphens():
 def test_add_pronunciation_for_word_one_hyphen__split_on_hyphen_false():
   word = f"hel{HYPHEN}lo"
   split_on_hyphen = False
-  pronuns = add_pronunciation_for_word(word, split_on_hyphen, get_pronunciation)
+  pronunciations = add_pronunciation_for_word(word, split_on_hyphen, get_pronunciation)
 
-  assert pronuns == (f"hel{HYPHEN}lo",)
+  assert pronunciations == (f"hel{HYPHEN}lo",)
 
 
 def test_add_pronunciation_for_word_one_hyphen__split_on_hyphen_true():
   word = f"hel{HYPHEN}lo"
   split_on_hyphen = True
-  pronuns = add_pronunciation_for_word(word, split_on_hyphen, get_pronunciation)
+  pronunciations = add_pronunciation_for_word(word, split_on_hyphen, get_pronunciation)
 
-  assert pronuns == ("hel", HYPHEN, "lo")
+  assert pronunciations == ("hel", HYPHEN, "lo")
 
 # endregion
 

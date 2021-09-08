@@ -11,10 +11,10 @@ def sentence2pronunciaton(sentence: str, trim_symbols: Set[Symbol], split_on_hyp
   if consider_annotation and len(annotation_split_symbol) != 1:
     raise ValueError("annotation_split_symbol has to be a string of length 1.")
   words = sentence.split(" ")
-  pronuns = [word2pronunciation(
+  pronunciations = [word2pronunciation(
       word, trim_symbols, split_on_hyphen, get_pronunciation, consider_annotation, annotation_split_symbol) for word in words]
-  complete_pronun = symbols_join(pronuns, " ")
-  return complete_pronun
+  complete_pronunciation = symbols_join(pronunciations, " ")
+  return complete_pronunciation
 
 
 def symbols_join(list_of_pronunciations: List[Pronunciation], join_symbol: Symbol) -> None:
@@ -54,11 +54,11 @@ def annotation2pronunciation(annot: str, annotation_split_symbol: Symbol) -> Pro
 
 def not_annotation_word2pronunciation(word: str, trim_symbols: Set[Symbol], split_on_hyphen: bool, get_pronunciation: Callable[[str], Pronunciation]) -> Pronunciation:
   trim_beginning, act_word, trim_end = trim_word(word, trim_symbols)
-  pronuns = [(trim_beginning,)]
-  pronuns.append(add_pronunciation_for_word(act_word, split_on_hyphen, get_pronunciation))
-  pronuns.append((trim_end,))
-  complete_pronun = pronunciation_list_to_pronunciation(pronuns)
-  return complete_pronun
+  pronunciations = [(trim_beginning,)]
+  pronunciations.append(add_pronunciation_for_word(act_word, split_on_hyphen, get_pronunciation))
+  pronunciations.append((trim_end,))
+  complete_pronunciation = pronunciation_list_to_pronunciation(pronunciations)
+  return complete_pronunciation
 
 
 def add_pronunciation_for_word(word: str, split_on_hyphen: bool, get_pronunciation: Callable[[str], Pronunciation]) -> Pronunciation:
@@ -69,9 +69,9 @@ def add_pronunciation_for_word(word: str, split_on_hyphen: bool, get_pronunciati
 
 def add_pronunciation_for_splitted_word(word: str, get_pronunciation: Callable[[str], Pronunciation]) -> Pronunciation:
   splitted_words = word.split(HYPHEN)
-  pronuns = [get_pronunciation(single_word) for single_word in splitted_words]
-  pronuns_with_hyphens = symbols_join(pronuns, HYPHEN)
-  return pronuns_with_hyphens
+  pronunciations = [get_pronunciation(single_word) for single_word in splitted_words]
+  pronunciations_with_hyphens = symbols_join(pronunciations, HYPHEN)
+  return pronunciations_with_hyphens
 
 
 def trim_word(word: str, trim_symbols: Set[Symbol]) -> Tuple[str, str, str]:
