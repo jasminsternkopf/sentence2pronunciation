@@ -1,8 +1,13 @@
+import string
 import pytest
-from sentence2pronunciation.core import (
-    add_pronunciation_for_splitted_word, add_pronunciation_for_word,
-    annotation2pronunciation, is_annotation, not_annotation_word2pronunciation,
-    pronunciation_list_to_pronunciation, sentence2pronunciaton, symbols_join, trim_word, word2pronunciation)
+from sentence2pronunciation.core import (add_pronunciation_for_splitted_word,
+                                         add_pronunciation_for_word,
+                                         annotation2pronunciation,
+                                         is_annotation,
+                                         not_annotation_word2pronunciation,
+                                         pronunciation_list_to_pronunciation,
+                                         sentence2pronunciaton, symbols_join,
+                                         trim_word, word2pronunciation)
 
 HYPHEN = "-"
 
@@ -131,6 +136,17 @@ def test_trim_word__trim_symbols_and_word_are_empty():
   assert res_1 == ""
   assert res_2 == ""
   assert res_3 == ""
+
+
+def test_trim_word__use_stringpunctuation_as_trim_symbols():
+  word = "!hello!"
+  trim_symbols = set(string.punctuation)
+  res_1, res_2, res_3 = trim_word(word, trim_symbols)
+
+  assert res_1 == "!"
+  assert res_2 == "hello"
+  assert res_3 == "!"
+
 
 # endregion
 

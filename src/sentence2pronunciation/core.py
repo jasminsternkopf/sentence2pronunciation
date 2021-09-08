@@ -78,6 +78,7 @@ def trim_word(word: str, trim_symbols: Set[Symbol]) -> Tuple[str, str, str]:
   trim_symbols_single_str = "".join(str(symb) for symb in trim_symbols)
   if len(trim_symbols_single_str) == 0:
     return "", word, ""
+  trim_symbols_single_str = re.escape(trim_symbols_single_str)
   trim = re.compile(rf"[{trim_symbols_single_str}]*")
   beginning = trim.match(word).group(0)
   reverse_word = word[::-1]
