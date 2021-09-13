@@ -27,33 +27,6 @@ def get_pronunciation(x: Pronunciation):
   return x
 
 
-# region add_pronunciation_for_splitted_word
-
-
-def test_add_pronunciation_for_splitted_word_no_hyphen():
-  word = "hello"
-  pronunciations = add_pronunciation_for_splitted_word(word, get_pronunciation)
-
-  assert pronunciations == ("hello",)
-
-
-def test_add_pronunciation_for_splitted_word_one_hyphen():
-  word = f"hel{HYPHEN}lo"
-  pronunciations = add_pronunciation_for_splitted_word(word, get_pronunciation)
-
-  assert pronunciations == ("hel", HYPHEN, "lo")
-
-
-def test_add_pronunciation_for_splitted_word_two_hyphens():
-  word = f"he{HYPHEN}ll{HYPHEN}o"
-  pronunciations = add_pronunciation_for_splitted_word(word, get_pronunciation)
-
-  assert pronunciations == ("he", HYPHEN, "ll", HYPHEN, "o")
-
-# endregion
-
-
-
 # region not_annotation_word2pronunciation
 
 
@@ -248,112 +221,6 @@ def test_not_annotation_word2pronunciation__hyphen_in_trim_symbolsols_and_split_
 
 # endregion
 
-
-# region word2pronunciation
-
-
-def test_word2pronunciaton__consider_annotation_is_false__word_is_not_annot():
-  consider_annotation = False
-  word = "hello"
-  trim_symbols = {"!"}
-  split_on_hyphen = False
-  annotation_split_symbol = "/"
-
-  res = word2pronunciation(word, trim_symbols, split_on_hyphen, get_pronunciation,
-                           consider_annotation, annotation_split_symbol)
-
-  assert res == ("hello",)
-
-
-def test_word2pronunciaton__consider_annotation_is_false__word_is_annot():
-  consider_annotation = False
-  word = "/hello/"
-  trim_symbols = {"!"}
-  split_on_hyphen = False
-  annotation_split_symbol = "/"
-
-  res = word2pronunciation(word, trim_symbols, split_on_hyphen, get_pronunciation,
-                           consider_annotation, annotation_split_symbol)
-
-  assert res == ("/hello/",)
-
-
-def test_word2pronunciaton__consider_annotation_is_true__word_is_annot():
-  consider_annotation = True
-  word = "/hello/"
-  trim_symbols = {"!"}
-  split_on_hyphen = False
-  annotation_split_symbol = "/"
-
-  res = word2pronunciation(word, trim_symbols, split_on_hyphen, get_pronunciation,
-                           consider_annotation, annotation_split_symbol)
-
-  assert res == ("hello",)
-
-
-def test_word2pronunciaton__consider_annotation_is_true__word_is_not_annot():
-  consider_annotation = True
-  word = "hello"
-  trim_symbols = {"!"}
-  split_on_hyphen = False
-  annotation_split_symbol = "/"
-
-  res = word2pronunciation(word, trim_symbols, split_on_hyphen, get_pronunciation,
-                           consider_annotation, annotation_split_symbol)
-
-  assert res == ("hello",)
-
-
-def test_word2pronunciaton__consider_annotation_is_true__annotation_split_symbol_has_len_2():
-  consider_annotation = True
-  word = "/hello/"
-  trim_symbols = {"!"}
-  split_on_hyphen = False
-  annotation_split_symbol = "//"
-
-  with pytest.raises(ValueError):
-    word2pronunciation(word, trim_symbols, split_on_hyphen, get_pronunciation,
-                       consider_annotation, annotation_split_symbol)
-
-
-def test_word2pronunciaton__consider_annotation_is_true__annotation_split_symbol_has_len_0():
-  consider_annotation = True
-  word = "/hello/"
-  trim_symbols = {"!"}
-  split_on_hyphen = False
-  annotation_split_symbol = ""
-
-  with pytest.raises(ValueError):
-    word2pronunciation(word, trim_symbols, split_on_hyphen, get_pronunciation,
-                       consider_annotation, annotation_split_symbol)
-
-
-def test_word2pronunciaton__consider_annotation_is_true__word_is_annot__annotation_split_symbol_is_also_trim_symbolsol():
-  consider_annotation = True
-  word = "/hello/"
-  trim_symbols = {"/"}
-  split_on_hyphen = False
-  annotation_split_symbol = "/"
-
-  res = word2pronunciation(word, trim_symbols, split_on_hyphen, get_pronunciation,
-                           consider_annotation, annotation_split_symbol)
-
-  assert res == ("hello",)
-
-
-def test_word2pronunciaton__consider_annotation_is_true__word_is_annot_and_contains_several_trim_symbolsols__annotation_split_symbol_is_also_trim_symbolsol():
-  consider_annotation = True
-  word = "/!hello!/"
-  trim_symbols = {"/", "!"}
-  split_on_hyphen = False
-  annotation_split_symbol = "/"
-
-  res = word2pronunciation(word, trim_symbols, split_on_hyphen, get_pronunciation,
-                           consider_annotation, annotation_split_symbol)
-
-  assert res == ("!hello!",)
-
-# endregion
 
 # region sentence2pronunciation
 
@@ -700,22 +567,25 @@ def test_add_pronunciation_for_splitted_word__double_hyphen_at_end():
 
 # region add_pronunciation_for_word
 
-HELLO_DICT = {("hel",HYPHEN, "lo"): ("hel","hyphen", "lo"), ("hel",): ("hel",), ("lo",): ("lo",)}
 
-def get_pronunciation_with_dict(word, dictionary = HELLO_DICT):
+HELLO_DICT = {("hel", HYPHEN, "lo"): ("hel", "hyphen", "lo"), ("hel",): ("hel",), ("lo",): ("lo",)}
+
+
+def get_pronunciation_with_dict(word, dictionary=HELLO_DICT):
   assert word in dictionary.keys()
   return dictionary[word]
 
+
 def test_add_pronunciation_for_word_one_hyphen__split_on_hyphen_false():
-  word = ("hel",HYPHEN,"lo")
+  word = ("hel", HYPHEN, "lo")
   split_on_hyphen = False
   res = add_pronunciation_for_word(word, split_on_hyphen, get_pronunciation_with_dict)
 
-  assert res == ("hel","hyphen", "lo")
+  assert res == ("hel", "hyphen", "lo")
 
 
 def test_add_pronunciation_for_word_one_hyphen__split_on_hyphen_true():
-  word = ("hel",HYPHEN,"lo")
+  word = ("hel", HYPHEN, "lo")
   split_on_hyphen = True
   res = add_pronunciation_for_word(word, split_on_hyphen, get_pronunciation_with_dict)
 
@@ -723,3 +593,108 @@ def test_add_pronunciation_for_word_one_hyphen__split_on_hyphen_true():
 
 # endregion
 
+# region word2pronunciation
+
+
+def test_word2pronunciaton__consider_annotation_is_false__word_is_not_annot():
+  consider_annotation = False
+  word = "hello"
+  trim_symbols = {"!"}
+  split_on_hyphen = False
+  annotation_split_symbol = "/"
+
+  res = word2pronunciation(word, trim_symbols, split_on_hyphen, get_pronunciation,
+                           consider_annotation, annotation_split_symbol)
+
+  assert res == ("hello",)
+
+
+def test_word2pronunciaton__consider_annotation_is_false__word_is_annot():
+  consider_annotation = False
+  word = "/hello/"
+  trim_symbols = {"!"}
+  split_on_hyphen = False
+  annotation_split_symbol = "/"
+
+  res = word2pronunciation(word, trim_symbols, split_on_hyphen, get_pronunciation,
+                           consider_annotation, annotation_split_symbol)
+
+  assert res == ("/hello/",)
+
+
+def test_word2pronunciaton__consider_annotation_is_true__word_is_annot():
+  consider_annotation = True
+  word = "/hello/"
+  trim_symbols = {"!"}
+  split_on_hyphen = False
+  annotation_split_symbol = "/"
+
+  res = word2pronunciation(word, trim_symbols, split_on_hyphen, get_pronunciation,
+                           consider_annotation, annotation_split_symbol)
+
+  assert res == ("hello",)
+
+
+def test_word2pronunciaton__consider_annotation_is_true__word_is_not_annot():
+  consider_annotation = True
+  word = "hello"
+  trim_symbols = {"!"}
+  split_on_hyphen = False
+  annotation_split_symbol = "/"
+
+  res = word2pronunciation(word, trim_symbols, split_on_hyphen, get_pronunciation,
+                           consider_annotation, annotation_split_symbol)
+
+  assert res == ("hello",)
+
+
+def test_word2pronunciaton__consider_annotation_is_true__annotation_split_symbol_has_len_2():
+  consider_annotation = True
+  word = "/hello/"
+  trim_symbols = {"!"}
+  split_on_hyphen = False
+  annotation_split_symbol = "//"
+
+  with pytest.raises(ValueError):
+    word2pronunciation(word, trim_symbols, split_on_hyphen, get_pronunciation,
+                       consider_annotation, annotation_split_symbol)
+
+
+def test_word2pronunciaton__consider_annotation_is_true__annotation_split_symbol_has_len_0():
+  consider_annotation = True
+  word = "/hello/"
+  trim_symbols = {"!"}
+  split_on_hyphen = False
+  annotation_split_symbol = ""
+
+  with pytest.raises(ValueError):
+    word2pronunciation(word, trim_symbols, split_on_hyphen, get_pronunciation,
+                       consider_annotation, annotation_split_symbol)
+
+
+def test_word2pronunciaton__consider_annotation_is_true__word_is_annot__annotation_split_symbol_is_also_trim_symbolsol():
+  consider_annotation = True
+  word = "/hello/"
+  trim_symbols = {"/"}
+  split_on_hyphen = False
+  annotation_split_symbol = "/"
+
+  res = word2pronunciation(word, trim_symbols, split_on_hyphen, get_pronunciation,
+                           consider_annotation, annotation_split_symbol)
+
+  assert res == ("hello",)
+
+
+def test_word2pronunciaton__consider_annotation_is_true__word_is_annot_and_contains_several_trim_symbolsols__annotation_split_symbol_is_also_trim_symbolsol():
+  consider_annotation = True
+  word = "/!hello!/"
+  trim_symbols = {"/", "!"}
+  split_on_hyphen = False
+  annotation_split_symbol = "/"
+
+  res = word2pronunciation(word, trim_symbols, split_on_hyphen, get_pronunciation,
+                           consider_annotation, annotation_split_symbol)
+
+  assert res == ("!hello!",)
+
+# endregion
