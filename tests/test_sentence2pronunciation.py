@@ -1,4 +1,5 @@
 import string
+
 import pytest
 from sentence2pronunciation.core import (add_pronunciation_for_splitted_word,
                                          add_pronunciation_for_word,
@@ -6,6 +7,8 @@ from sentence2pronunciation.core import (add_pronunciation_for_splitted_word,
                                          is_annotation,
                                          not_annotation_word2pronunciation,
                                          pronunciation_list_to_pronunciation,
+                                         remove_trim_symbols_at_beginning,
+                                         remove_trim_symbols_at_end,
                                          sentence2pronunciaton, symbols_join,
                                          trim_word, word2pronunciation)
 
@@ -684,5 +687,47 @@ def test_sentence2pronunciation__consider_annotation_is_true__annotation_split_s
   with pytest.raises(ValueError):
     sentence2pronunciaton(sentence, trim_symbols, split_on_hyphen,
                           get_pronunciation, consider_annotation, annotation_split_symbol)
+
+# endregion
+
+# new
+
+# region remove_trim_symbols_at_beginning
+
+
+def test_remove_trim_symbols_at_beginning():
+  word = ("!", "(", "hel", "lo", "(", "!")
+  trim_symbols = {"!", "("}
+  res_1, res_2 = remove_trim_symbols_at_beginning(word, trim_symbols)
+
+  assert res_1 == ("!", "(")
+  assert res_2 == ("hel", "lo", "(", "!")
+
+# endregion
+
+# region remove_trim_symbols_at_end
+
+
+def test_remove_trim_symbols_at_end():
+  word = ("!", "(", "hel", "lo", "(", "!")
+  trim_symbols = {"!", "("}
+  res_1, res_2 = remove_trim_symbols_at_end(word, trim_symbols)
+
+  assert res_1 == ("!", "(", "hel", "lo")
+  assert res_2 == ("(", "!")
+
+# endregion
+
+# region trim_word
+
+
+def test_trim_word():
+  word = ("!", "(", "hel", "lo", "(", "!")
+  trim_symbols = {"!", "("}
+  res_1, res_2, res_3 = trim_word(word, trim_symbols)
+
+  assert res_1 == ("!", "(")
+  assert res_2 == ("hel", "lo")
+  assert res_3 == ("(", "!")
 
 # endregion
