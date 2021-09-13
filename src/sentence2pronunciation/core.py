@@ -58,22 +58,22 @@ def not_annotation_word2pronunciation(word: Pronunciation, trim_symbols: Set[Sym
   complete_pronunciation = pronunciation_list_to_pronunciation(pronunciations)
   return complete_pronunciation  # should work, not tested yet
 
+# below is done
 
 def add_pronunciation_for_word(word: Pronunciation, split_on_hyphen: bool, get_pronunciation: Callable[[Pronunciation], Pronunciation]) -> Pronunciation:
   if split_on_hyphen:
     return add_pronunciation_for_splitted_word(word, get_pronunciation)
-  return get_pronunciation(word)  # should work, not tested yet
+  return get_pronunciation(word)
 
 
 def add_pronunciation_for_splitted_word(word: Pronunciation, get_pronunciation: Callable[[Pronunciation], Pronunciation]) -> Pronunciation:
   splitted_words = split_word_on_hyphens(word)
   pronunciations = [get_pronunciation(single_word) for single_word in splitted_words]
   pronunciations_with_hyphens = symbols_join(pronunciations, HYPHEN)
-  return pronunciations_with_hyphens  # works
+  return pronunciations_with_hyphens
 
 
 def split_word_on_hyphens(word: Pronunciation):
-  # assert word[0] != HYPHEN and word[-1] != HYPHEN
   single_word = []
   all_single_words = []
   for element in word:
@@ -82,11 +82,9 @@ def split_word_on_hyphens(word: Pronunciation):
     else:
       all_single_words.append(tuple(single_word))
       single_word = []
-  if len(single_word) != 0:
-    all_single_words.append(tuple(single_word))
-  return all_single_words  # works, Stefan fragen
+  all_single_words.append(tuple(single_word))
+  return all_single_words
 
-# below is done
 
 
 def trim_word(word: Pronunciation, trim_symbols: Set[Symbol]) -> Tuple[Pronunciation, Pronunciation, Pronunciation]:

@@ -26,26 +26,6 @@ HYPHEN = "-"
 def get_pronunciation(x: Pronunciation):
   return x
 
-# region pronunciation_list_to_pronunciation
-
-
-def test_pronunciation_list_to_pronunciation():
-  p = [("a",), ("bc", "d"), ("efg",), ("",), ("hi", "")]
-  res = pronunciation_list_to_pronunciation(p)
-
-  assert isinstance(res, tuple)
-  assert res == ("a", "bc", "d", "efg", "hi")
-
-
-def test_pronunciation_list_to_pronunciation_empty_list():
-  p = []
-  res = pronunciation_list_to_pronunciation(p)
-
-  assert isinstance(res, tuple)
-  assert res == ()
-
-# endregion
-
 
 # region add_pronunciation_for_splitted_word
 
@@ -72,25 +52,7 @@ def test_add_pronunciation_for_splitted_word_two_hyphens():
 
 # endregion
 
-# region add_pronunciation_for_word
 
-
-def test_add_pronunciation_for_word_one_hyphen__split_on_hyphen_false():
-  word = f"hel{HYPHEN}lo"
-  split_on_hyphen = False
-  pronunciations = add_pronunciation_for_word(word, split_on_hyphen, get_pronunciation)
-
-  assert pronunciations == (f"hel{HYPHEN}lo",)
-
-
-def test_add_pronunciation_for_word_one_hyphen__split_on_hyphen_true():
-  word = f"hel{HYPHEN}lo"
-  split_on_hyphen = True
-  pronunciations = add_pronunciation_for_word(word, split_on_hyphen, get_pronunciation)
-
-  assert pronunciations == ("hel", HYPHEN, "lo")
-
-# endregion
 
 # region not_annotation_word2pronunciation
 
@@ -287,18 +249,6 @@ def test_not_annotation_word2pronunciation__hyphen_in_trim_symbolsols_and_split_
 # endregion
 
 
-# region symbols_join
-
-
-def test_symbols_join():
-  list_of_pronunciations = [("abc",), ("de",), ("f",)]
-  join_symbol = HYPHEN
-  res = symbols_join(list_of_pronunciations, join_symbol)
-
-  assert res == ("abc", HYPHEN, "de", HYPHEN, "f")
-
-# endregion
-
 # region word2pronunciation
 
 
@@ -485,7 +435,39 @@ def test_sentence2pronunciation__consider_annotation_is_true__annotation_split_s
 
 # endregion
 
-# new
+# new or still valid
+
+# region symbols_join
+
+
+def test_symbols_join():
+  list_of_pronunciations = [("abc",), ("de",), ("f",)]
+  join_symbol = HYPHEN
+  res = symbols_join(list_of_pronunciations, join_symbol)
+
+  assert res == ("abc", HYPHEN, "de", HYPHEN, "f")
+
+# endregion
+
+# region pronunciation_list_to_pronunciation
+
+
+def test_pronunciation_list_to_pronunciation():
+  p = [("a",), ("bc", "d"), ("efg",), ("",), ("hi", "")]
+  res = pronunciation_list_to_pronunciation(p)
+
+  assert isinstance(res, tuple)
+  assert res == ("a", "bc", "d", "efg", "hi")
+
+
+def test_pronunciation_list_to_pronunciation_empty_list():
+  p = []
+  res = pronunciation_list_to_pronunciation(p)
+
+  assert isinstance(res, tuple)
+  assert res == ()
+
+# endregion
 
 # region remove_trim_symbols_at_beginning
 
@@ -625,28 +607,119 @@ def test_annotation2pronunciation__one_element_consists_of_annotation_split_symb
 # region split_word_on_hyphens
 
 
-def test_split_word_on_hyphens():
-  word = ("ab", "c", HYPHEN, "d", "e", HYPHEN, "f")
+def test_split_word_on_hyphens__hyphen_only_in_middle_and_not_double():
+  word = ("ab", "c", HYPHEN, "d", "e")
   res = split_word_on_hyphens(word)
 
-  assert res == [("ab", "c"), ("d", "e"), ("f",)]
+  assert res == [("ab", "c"), ("d", "e")]
 
 
-def test_split_word_on_hyphens_ends_with_hyphen():
-  word = ("ab", "c", HYPHEN, "d", "e", HYPHEN, "f", HYPHEN)
+def test_split_word_on_hyphens__double_hyphen_in_middle():
+  word = ("ab", "c", HYPHEN, HYPHEN, "d", "e")
   res = split_word_on_hyphens(word)
 
-  assert res == [("ab", "c"), ("d", "e"), ("f",)]
+  assert res == [("ab", "c"), (), ("d", "e")]
+
+
+def test_split_word_on_hyphens__hyphen_at_beginning():
+  word = (HYPHEN, "ab", "c")
+  res = split_word_on_hyphens(word)
+
+  assert res == [(), ("ab", "c")]
+
+
+def test_split_word_on_hyphens__double_hyphen_at_beginning():
+  word = (HYPHEN, HYPHEN, "ab", "c")
+  res = split_word_on_hyphens(word)
+
+  assert res == [(), (), ("ab", "c")]
+
+
+def test_split_word_on_hyphens__hyphen_at_end():
+  word = ("f", HYPHEN,)
+  res = split_word_on_hyphens(word)
+
+  assert res == [("f",), ()]
+
+
+def test_split_word_on_hyphens__double_hyphen_at_end():
+  word = ("f", HYPHEN, HYPHEN,)
+  res = split_word_on_hyphens(word)
+
+  assert res == [("f",), (), ()]
 
 # endregion
 
 # region add_pronunciation_for_splitted_word
 
 
-def test_add_pronunciation_for_splitted_word():
-  word = ("ab", "c", HYPHEN, "d", "e", HYPHEN, "f")
+def test_add_pronunciation_for_splitted_word__hyphen_only_in_middle_and_not_double():
+  word = ("ab", "c", HYPHEN, "d", "e")
   res = add_pronunciation_for_splitted_word(word, get_pronunciation)
 
-  assert res == ("ab", "c", HYPHEN, "d", "e", HYPHEN, "f")
+  assert res == word
+
+
+def test_add_pronunciation_for_splitted_word__double_hyphen_in_middle():
+  word = ("ab", "c", HYPHEN, HYPHEN, "d", "e")
+  res = add_pronunciation_for_splitted_word(word, get_pronunciation)
+
+  assert res == word
+
+
+def test_add_pronunciation_for_splitted_word__hyphen_at_beginning():
+  word = (HYPHEN, "ab", "c")
+  res = add_pronunciation_for_splitted_word(word, get_pronunciation)
+
+  assert res == word
+
+
+def test_add_pronunciation_for_splitted_word__double_hyphen_at_beginning():
+  word = (HYPHEN, HYPHEN, "ab", "c")
+  res = add_pronunciation_for_splitted_word(word, get_pronunciation)
+
+  assert res == word
+
+
+def test_add_pronunciation_for_splitted_word__hyphen_at_end():
+  word = ("f", HYPHEN,)
+  res = add_pronunciation_for_splitted_word(word, get_pronunciation)
+
+  assert res == word
+
+
+def test_add_pronunciation_for_splitted_word__double_hyphen_at_end():
+  word = ("f", HYPHEN, HYPHEN,)
+  res = add_pronunciation_for_splitted_word(word, get_pronunciation)
+
+  assert res == word
 
 # endregion
+
+# end new or still valid
+
+# region add_pronunciation_for_word
+
+HELLO_DICT = {("hel",HYPHEN, "lo"): ("hel","hyphen", "lo"), ("hel",): ("hel",), ("lo",): ("lo",)}
+
+def get_pronunciation_with_dict(word, dictionary = HELLO_DICT):
+  assert word in dictionary.keys()
+  return dictionary[word]
+
+def test_add_pronunciation_for_word_one_hyphen__split_on_hyphen_false():
+  word = ("hel",HYPHEN,"lo")
+  split_on_hyphen = False
+  res = add_pronunciation_for_word(word, split_on_hyphen, get_pronunciation_with_dict)
+
+  assert res == ("hel","hyphen", "lo")
+
+
+def test_add_pronunciation_for_word_one_hyphen__split_on_hyphen_true():
+  word = ("hel",HYPHEN,"lo")
+  split_on_hyphen = True
+  res = add_pronunciation_for_word(word, split_on_hyphen, get_pronunciation_with_dict)
+
+  assert res == ("hel", HYPHEN, "lo")
+
+# endregion
+
