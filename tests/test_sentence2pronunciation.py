@@ -1,7 +1,8 @@
 import string
 
 import pytest
-from sentence2pronunciation.core import (add_pronunciation_for_splitted_word,
+from sentence2pronunciation.core import (Pronunciation,
+                                         add_pronunciation_for_splitted_word,
                                          add_pronunciation_for_word,
                                          annotation2pronunciation,
                                          is_annotation,
@@ -9,14 +10,21 @@ from sentence2pronunciation.core import (add_pronunciation_for_splitted_word,
                                          pronunciation_list_to_pronunciation,
                                          remove_trim_symbols_at_beginning,
                                          remove_trim_symbols_at_end,
-                                         sentence2pronunciaton, symbols_join,
+                                         sentence2pronunciaton,
+                                         split_word_on_hyphens, symbols_join,
                                          trim_word, word2pronunciation)
 
 HYPHEN = "-"
 
 
-def get_pronunciation(x):
-  return (x,)
+# def get_pronunciation(x: Pronunciation):
+#   y = []
+#   for ele in x:
+#     y.append(ele+ele)
+#   return tuple(y)
+
+def get_pronunciation(x: Pronunciation):
+  return x
 
 # region pronunciation_list_to_pronunciation
 
@@ -39,120 +47,6 @@ def test_pronunciation_list_to_pronunciation_empty_list():
 # endregion
 
 
-# region trim_word
-
-def test_trim_word_trimsymbs_before_and_after():
-  word = "!(hello(!"
-  trim_symbols = {"!", "("}
-  res_1, res_2, res_3 = trim_word(word, trim_symbols)
-
-  assert res_1 == "!("
-  assert res_2 == "hello"
-  assert res_3 == "(!"
-
-
-def test_trim_word_trimsymbs_only_before():
-  word = "!(hello"
-  trim_symbols = {"!", "("}
-  res_1, res_2, res_3 = trim_word(word, trim_symbols)
-
-  assert res_1 == "!("
-  assert res_2 == "hello"
-  assert res_3 == ""
-
-
-def test_trim_word_trimsymbs_only_after():
-  word = "hello!"
-  trim_symbols = {"!"}
-  res_1, res_2, res_3 = trim_word(word, trim_symbols)
-
-  assert res_1 == ""
-  assert res_2 == "hello"
-  assert res_3 == "!"
-
-
-def test_trim_word_trimsymbs_before_in_between_and_after():
-  word = "!(hel!(!lo(!"
-  trim_symbols = {"!", "("}
-  res_1, res_2, res_3 = trim_word(word, trim_symbols)
-
-  assert res_1 == "!("
-  assert res_2 == "hel!(!lo"
-  assert res_3 == "(!"
-
-
-def test_trim_word_trimsymbs_only_in_between():
-  word = "hel!(!lo"
-  trim_symbols = {"!", "("}
-  res_1, res_2, res_3 = trim_word(word, trim_symbols)
-
-  assert res_1 == ""
-  assert res_2 == "hel!(!lo"
-  assert res_3 == ""
-
-
-def test_trim_word_trimsymbs_in_between_and_before():
-  word = "!(hel!(!lo"
-  trim_symbols = {"!", "("}
-  res_1, res_2, res_3 = trim_word(word, trim_symbols)
-
-  assert res_1 == "!("
-  assert res_2 == "hel!(!lo"
-  assert res_3 == ""
-
-
-def test_trim_word_trimsymbs_in_between_and_after():
-  word = "hel!(!lo!"
-  trim_symbols = {"!", "("}
-  res_1, res_2, res_3 = trim_word(word, trim_symbols)
-
-  assert res_1 == ""
-  assert res_2 == "hel!(!lo"
-  assert res_3 == "!"
-
-
-def test_trim_word__trim_symbols_is_empty():
-  word = "!(hello(!"
-  trim_symbols = {}
-  res_1, res_2, res_3 = trim_word(word, trim_symbols)
-
-  assert res_1 == ""
-  assert res_2 == word
-  assert res_3 == ""
-
-
-def test_trim_word__word_is_empty():
-  word = ""
-  trim_symbols = {"!"}
-  res_1, res_2, res_3 = trim_word(word, trim_symbols)
-
-  assert res_1 == ""
-  assert res_2 == ""
-  assert res_3 == ""
-
-
-def test_trim_word__trim_symbols_and_word_are_empty():
-  word = ""
-  trim_symbols = {}
-  res_1, res_2, res_3 = trim_word(word, trim_symbols)
-
-  assert res_1 == ""
-  assert res_2 == ""
-  assert res_3 == ""
-
-
-def test_trim_word__use_stringpunctuation_as_trim_symbols():
-  word = "!hello!"
-  trim_symbols = set(string.punctuation)
-  res_1, res_2, res_3 = trim_word(word, trim_symbols)
-
-  assert res_1 == "!"
-  assert res_2 == "hello"
-  assert res_3 == "!"
-
-
-# endregion
-
 # region add_pronunciation_for_splitted_word
 
 
@@ -170,7 +64,7 @@ def test_add_pronunciation_for_splitted_word_one_hyphen():
   assert pronunciations == ("hel", HYPHEN, "lo")
 
 
-def test_aadd_pronunciation_for_splitted_word_two_hyphens():
+def test_add_pronunciation_for_splitted_word_two_hyphens():
   word = f"he{HYPHEN}ll{HYPHEN}o"
   pronunciations = add_pronunciation_for_splitted_word(word, get_pronunciation)
 
@@ -392,105 +286,6 @@ def test_not_annotation_word2pronunciation__hyphen_in_trim_symbolsols_and_split_
 
 # endregion
 
-# region is_annotation
-
-
-def test_is_annotation_split_symbol_just_at_beginning_and_end():
-  word = "/hello/"
-  assert is_annotation(word, "/")
-
-
-def test_is_annotation_two_split_symbols_at_beginning_and_end():
-  word = "//hello//"
-  assert is_annotation(word, "/")
-
-
-def test_is_annotation_split_symbol_also_in_between():
-  word = "/hel/lo/"
-  assert is_annotation(word, "/")
-
-
-def test_is_annotation_no_split_symbol_at_end():
-  word = "/hello"
-  assert not is_annotation(word, "/")
-
-
-def test_is_annotation_no_split_symbol_at_end_but_in_between():
-  word = "/hel/lo"
-  assert not is_annotation(word, "/")
-
-
-def test_is_annotation_no_split_symbol_at_beginning():
-  word = "hello/"
-  assert not is_annotation(word, "/")
-
-
-def test_is_annotation_no_split_symbol_at_beginning_but_in_between():
-  word = "hel/lo/"
-  assert not is_annotation(word, "/")
-
-
-def test_is_annotation_word_is_only_two_split_symbols():
-  word = "//"
-  assert is_annotation(word, "/")
-
-
-def test_is_annotation_two_split_symbols_in_middle_of_word():
-  word = "/hel//lo/"
-  assert is_annotation(word, "/")
-
-
-def test_is_annotation_word_is_empty():
-  word = ""
-  assert not is_annotation(word, "/")
-
-# endregion
-
-# region annotation2pronunciation
-
-
-def test_annotation2pronunciation():
-  annot = "/hello/world/!/"
-  res = annotation2pronunciation(annot, "/")
-
-  assert res == ("hello", "world", "!")
-
-
-def test_annotation2pronunciation_double_annotation_split_symbol_between_annotations():
-  annot = "/hello//world/!/"
-  res = annotation2pronunciation(annot, "/")
-
-  assert res == ("hello", "world", "!")
-
-
-def test_annotation2pronunciation_double_annotation_split_symbol_at_beginning():
-  annot = "//hello/world/!/"
-  res = annotation2pronunciation(annot, "/")
-
-  assert res == ("hello", "world", "!")
-
-
-def test_annotation2pronunciation_double_annotation_split_symbol_at_end():
-  annot = "/hello//world/!//"
-  res = annotation2pronunciation(annot, "/")
-
-  assert res == ("hello", "world", "!")
-
-
-def test_annotation2pronunciation_word_is_only_two_split_symbols():
-  annot = "//"
-  res = annotation2pronunciation(annot, "/")
-
-  assert res == ()
-
-
-def test_annotation2pronunciation_two_split_symbols_in_middle_of_word():
-  annot = "/hel//lo/"
-  res = annotation2pronunciation(annot, "/")
-
-  assert res == ("hel", "lo")
-
-# endregion
 
 # region symbols_join
 
@@ -703,6 +498,42 @@ def test_remove_trim_symbols_at_beginning():
   assert res_1 == ("!", "(")
   assert res_2 == ("hel", "lo", "(", "!")
 
+
+def test_remove_trim_symbols_at_beginning__first_element_consists_of_trim_symbol_and_not_trim_symbol():
+  word = ("!?", "(", "hel", "lo", "(", "!")
+  trim_symbols = {"!", "("}
+  res_1, res_2 = remove_trim_symbols_at_beginning(word, trim_symbols)
+
+  assert res_1 == ()
+  assert res_2 == word
+
+
+def test_remove_trim_symbols_at_beginning__trim_symbols_empty():
+  word = ("!", "(", "hel", "lo", "(", "!")
+  trim_symbols = {}
+  res_1, res_2 = remove_trim_symbols_at_beginning(word, trim_symbols)
+
+  assert res_1 == ()
+  assert res_2 == word
+
+
+def test_remove_trim_symbols_at_beginning__word_is_empty():
+  word = ()
+  trim_symbols = {"!", "("}
+  res_1, res_2 = remove_trim_symbols_at_beginning(word, trim_symbols)
+
+  assert res_1 == ()
+  assert res_2 == ()
+
+
+def test_remove_trim_symbols_at_beginning__word_and_trim_symbols_are_empty():
+  word = ()
+  trim_symbols = {}
+  res_1, res_2 = remove_trim_symbols_at_beginning(word, trim_symbols)
+
+  assert res_1 == ()
+  assert res_2 == ()
+
 # endregion
 
 # region remove_trim_symbols_at_end
@@ -715,6 +546,15 @@ def test_remove_trim_symbols_at_end():
 
   assert res_1 == ("!", "(", "hel", "lo")
   assert res_2 == ("(", "!")
+
+
+def test_remove_trim_symbols_at_end__word_is_empty():
+  word = ()
+  trim_symbols = {"!", "("}
+  res_1, res_2 = remove_trim_symbols_at_end(word, trim_symbols)
+
+  assert res_1 == ()
+  assert res_2 == ()
 
 # endregion
 
@@ -729,5 +569,84 @@ def test_trim_word():
   assert res_1 == ("!", "(")
   assert res_2 == ("hel", "lo")
   assert res_3 == ("(", "!")
+
+# endregion
+
+# region is_annotation
+
+
+def test_is_annotation__is_annotation():
+  word = ("/", "abc", "/", "d", "/")
+  res = is_annotation(word, "/")
+
+  assert res
+
+
+def test_is_annotation__is_not_annotation__first_element_is_annotation_split_symbol_together_with_other_symbol():
+  word = ("/a", "abc", "/", "d", "/")
+  res = is_annotation(word, "/")
+
+  assert not res
+
+
+def test_is_annotation__annotation_split_symbol_only_at_beginning():
+  word = ("/", "abc", "/", "d")
+  res = is_annotation(word, "/")
+
+  assert not res
+
+
+def test_is_annotation__annotation_split_symbol_only_at_end():
+  word = ("abc", "/", "d", "/")
+  res = is_annotation(word, "/")
+
+  assert not res
+
+# endregion
+
+# region annotation2pronunciation
+
+
+def test_annotation2pronunciation():
+  annotation = ("/", "abc", "/", "d", "/")
+  res = annotation2pronunciation(annotation, "/")
+
+  assert res == ("abc", "d")
+
+
+def test_annotation2pronunciation__one_element_consists_of_annotation_split_symbol_and_other_symbol():
+  annotation = ("/", "abc", "/", "/d", "/")
+  res = annotation2pronunciation(annotation, "/")
+
+  assert res == ("abc", "/d")
+
+# endregion
+
+# region split_word_on_hyphens
+
+
+def test_split_word_on_hyphens():
+  word = ("ab", "c", HYPHEN, "d", "e", HYPHEN, "f")
+  res = split_word_on_hyphens(word)
+
+  assert res == [("ab", "c"), ("d", "e"), ("f",)]
+
+
+def test_split_word_on_hyphens_ends_with_hyphen():
+  word = ("ab", "c", HYPHEN, "d", "e", HYPHEN, "f", HYPHEN)
+  res = split_word_on_hyphens(word)
+
+  assert res == [("ab", "c"), ("d", "e"), ("f",)]
+
+# endregion
+
+# region add_pronunciation_for_splitted_word
+
+
+def test_add_pronunciation_for_splitted_word():
+  word = ("ab", "c", HYPHEN, "d", "e", HYPHEN, "f")
+  res = add_pronunciation_for_splitted_word(word, get_pronunciation)
+
+  assert res == ("ab", "c", HYPHEN, "d", "e", HYPHEN, "f")
 
 # endregion
