@@ -1,2 +1,3 @@
-from sentence2pronunciation.core import (
-    sentence2pronunciaton, word2pronunciation)
+from sentence2pronunciation.core import (Pronunciation, Symbol,
+                                         sentence2pronunciation,
+                                         word2pronunciation)
