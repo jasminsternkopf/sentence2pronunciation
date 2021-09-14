@@ -36,29 +36,29 @@ def word2pronunciation(word: Pronunciation, trim_symbols: Set[Symbol], split_on_
   new_pronun = not_annotation_word2pronunciation(
     word, trim_symbols, split_on_hyphen, get_pronunciation)
   return new_pronun  # should work, not tested yet
+# below is done
 
 
 def is_annotation(word: Pronunciation, annotation_split_symbol: Symbol) -> bool:
   assert len(annotation_split_symbol) == 1
-  return word[0] == annotation_split_symbol and word[-1] == annotation_split_symbol  # works
-
+  return word[0] == annotation_split_symbol and word[-1] == annotation_split_symbol
 
 def annotation2pronunciation(annotation: Pronunciation, annotation_split_symbol: Symbol) -> Pronunciation:
   assert is_annotation(annotation, annotation_split_symbol)
   single_annotations = tuple(
     [element for element in annotation if element != annotation_split_symbol])
-  return single_annotations  # works
+  return single_annotations
 
 
 def not_annotation_word2pronunciation(word: Pronunciation, trim_symbols: Set[Symbol], split_on_hyphen: bool, get_pronunciation: Callable[[Pronunciation], Pronunciation]) -> Pronunciation:
-  trim_beginning, act_word, trim_end = trim_word(word, trim_symbols)
+  trim_beginning, actual_word, trim_end = trim_word(word, trim_symbols)
   pronunciations = [trim_beginning]
-  pronunciations.append(add_pronunciation_for_word(act_word, split_on_hyphen, get_pronunciation))
+  actual_pronunciation = add_pronunciation_for_word(actual_word, split_on_hyphen, get_pronunciation)
+  pronunciations.append(actual_pronunciation)
   pronunciations.append(trim_end)
   complete_pronunciation = pronunciation_list_to_pronunciation(pronunciations)
-  return complete_pronunciation  # should work, not tested yet
+  return complete_pronunciation
 
-# below is done
 
 def add_pronunciation_for_word(word: Pronunciation, split_on_hyphen: bool, get_pronunciation: Callable[[Pronunciation], Pronunciation]) -> Pronunciation:
   if split_on_hyphen:
