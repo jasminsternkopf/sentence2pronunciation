@@ -37,14 +37,31 @@ def word2pronunciation(word: Pronunciation, trim_symbols: Set[Symbol], split_on_
 
 
 def is_annotation(word: Pronunciation, annotation_split_symbol: Symbol) -> bool:
-  assert len(annotation_split_symbol) == 1
   return word[0] == annotation_split_symbol and word[-1] == annotation_split_symbol
 
+
 def annotation2pronunciation(annotation: Pronunciation, annotation_split_symbol: Symbol) -> Pronunciation:
+  return get_annotation_content(annotation, annotation_split_symbol)
+  # assert is_annotation(annotation, annotation_split_symbol)
+  # single_annotations = tuple(
+  #   [element for element in annotation if element != annotation_split_symbol])
+  # return single_annotations
+
+
+def get_annotation_content(annotation: Pronunciation, annotation_split_symbol: Symbol) -> Pronunciation:
   assert is_annotation(annotation, annotation_split_symbol)
-  single_annotations = tuple(
-    [element for element in annotation if element != annotation_split_symbol])
-  return single_annotations
+  resulting_parts = []
+  current_merge = ""
+  for symbol in annotation[1:-1]:
+    if symbol == annotation_split_symbol:
+      if current_merge != "":
+        resulting_parts.append(current_merge)
+        current_merge = ""
+    else:
+      current_merge += symbol
+  if current_merge != "":
+    resulting_parts.append(current_merge)
+  return tuple(resulting_parts)
 
 
 def not_annotation_word2pronunciation(word: Pronunciation, trim_symbols: Set[Symbol], split_on_hyphen: bool, get_pronunciation: Callable[[Pronunciation], Pronunciation]) -> Pronunciation:

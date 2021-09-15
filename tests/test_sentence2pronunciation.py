@@ -3,7 +3,7 @@ from sentence2pronunciation.core import (Pronunciation,
                                          add_pronunciation_for_splitted_word,
                                          add_pronunciation_for_word,
                                          annotation2pronunciation,
-                                         is_annotation,
+                                         get_annotation_content, is_annotation,
                                          not_annotation_word2pronunciation,
                                          pronunciation_list_to_pronunciation,
                                          remove_trim_symbols_at_beginning,
@@ -35,6 +35,63 @@ def get_pronunciation_with_dict_or_replace(word, dictionary=HELLO_DICT):
     return dictionary[word]
   return ("*",)
 
+# region get_annotation_content
+
+
+def test_get_annotation_content__one_symbols__is_taken():
+  result = get_annotation_content(
+    annotation=("/", "h", "/"),
+    annotation_split_symbol="/",
+  )
+
+  assert result == ("h",)
+
+
+def test_get_annotation_content__two_symbols__were_merged():
+  result = get_annotation_content(
+    annotation=("/", "h", "a", "/"),
+    annotation_split_symbol="/",
+  )
+
+  assert result == ("ha",)
+
+
+def test_get_annotation_content__two_symbols_in_one_symbol__were_merged():
+  result = get_annotation_content(
+    annotation=("/", "ha", "/"),
+    annotation_split_symbol="/",
+  )
+
+  assert result == ("ha",)
+
+
+def test_get_annotation_content__two_symbols_separated_by_split__were_not_merged():
+  result = get_annotation_content(
+    annotation=("/", "h", "/", "a", "/"),
+    annotation_split_symbol="/",
+  )
+
+  assert result == ("h", "a",)
+
+
+def test_get_annotation_content__empty_inner_annotation_is_ignored():
+  result = get_annotation_content(
+    annotation=("/", "/", "a", "/"),
+    annotation_split_symbol="/",
+  )
+
+  assert result == ("a",)
+
+
+def test_get_annotation_content__empty_annotation_is_ignored():
+  result = get_annotation_content(
+    annotation=("/", "/"),
+    annotation_split_symbol="/",
+  )
+
+  assert result == ()
+
+# endregion
 
 # region symbols_join
 
@@ -378,14 +435,14 @@ def test_word2pronunciation__consider_annotation_is_true__annotation_split_symbo
 
 def test_word2pronunciation__consider_annotation_is_true__word_is_annotation():
   consider_annotation = True
-  word = ("/", "hello", "/")
+  word = ("/", "h", "e", "/")
   trim_symbols = {"!"}
   split_on_hyphen = False
   annotation_split_symbol = "/"
   res = word2pronunciation(word, trim_symbols, split_on_hyphen, get_pronunciation_with_dict,
                            consider_annotation, annotation_split_symbol)
 
-  assert res == ("hello",)
+  assert res == ("he",)
 
 
 def test_word2pronunciation__consider_annotation_is_false__word_is_annotation():
@@ -481,6 +538,19 @@ def test_sentence2pronunciation__single_annotation():
 
 def test_sentence2pronunciation__one_word_and_one_annotation():
   sentence = ("hello", " ", "/", "world", "/")
+  trim_symbols = {"!"}
+  split_on_hyphen = True
+  consider_annotation = True
+  annotation_split_symbol = "/"
+
+  res = sentence2pronunciation(sentence, trim_symbols, split_on_hyphen,
+                               get_pronunciation, consider_annotation, annotation_split_symbol)
+
+  assert res == ("hello", " ", "world")
+
+
+def test_sentence2pronunciation__one_word_and_one_annotation_separate_symbols():
+  sentence = ("hello", " ", "/", "w", "o", "r", "l", "d", "/")
   trim_symbols = {"!"}
   split_on_hyphen = True
   consider_annotation = True
