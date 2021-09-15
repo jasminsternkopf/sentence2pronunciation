@@ -486,6 +486,7 @@ def test_sentence2pronunciation_cached__dont_ignore_case():
     split_on_hyphen=True,
     trim_symbols="?",
   )
+
   clear_cache()
   assert result == ("aa", " ", "AA", " ", "ab", " ", "AA", "-", "aa", "?")
 
@@ -500,6 +501,7 @@ def test_sentence2pronunciation_cached__ignore_case__ignores_case():
     split_on_hyphen=True,
     trim_symbols="?",
   )
+
   clear_cache()
   assert result == ("aa", " ", "aa", " ", "ab", " ", "aa", "-", "aa", "?")
 
@@ -518,6 +520,7 @@ def test_word2pronunciation_cached__dont_ignore_case():
     split_on_hyphen=True,
     trim_symbols="?",
   )
+
   clear_cache()
   assert result == ("?", "AA", "-", "aa", "?")
 
@@ -532,6 +535,7 @@ def test_word2pronunciation_cached__ignore_case__ignores_case():
     split_on_hyphen=True,
     trim_symbols="?",
   )
+
   clear_cache()
   assert result == ("?", "AA", "-", "AA", "?")
 
