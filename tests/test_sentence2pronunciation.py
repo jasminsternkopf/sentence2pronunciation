@@ -1,6 +1,5 @@
 import pytest
-from sentence2pronunciation.core import (Pronunciation,
-                                         add_pronunciation_for_splitted_word,
+from sentence2pronunciation.core import (add_pronunciation_for_splitted_word,
                                          add_pronunciation_for_word,
                                          annotation2pronunciation,
                                          get_annotation_content, is_annotation,
@@ -9,9 +8,13 @@ from sentence2pronunciation.core import (Pronunciation,
                                          remove_trim_symbols_at_beginning,
                                          remove_trim_symbols_at_end,
                                          sentence2pronunciation,
+                                         sentence2pronunciation_cached,
                                          split_pronunciation_on_symbol,
                                          symbols_join, trim_word,
-                                         word2pronunciation)
+                                         word2pronunciation,
+                                         word2pronunciation_cached)
+from sentence2pronunciation.lookup_cache import clear_cache
+from sentence2pronunciation.types import Pronunciation
 
 HYPHEN = "-"
 
@@ -467,6 +470,74 @@ def test_word2pronunciation__word_is_not_annotation():
                            consider_annotation, annotation_split_symbol)
 
   assert res == word
+
+# endregion
+
+# region sentence2pronunciation_cached
+
+
+def test_sentence2pronunciation_cached__dont_ignore_case():
+  result = sentence2pronunciation_cached(
+    sentence=tuple("a A /ab/ A-a?"),
+    annotation_split_symbol="/",
+    consider_annotation=True,
+    get_pronunciation=lambda pronunciation: tuple([pronunciation[0] + pronunciation[0]]),
+    ignore_case_in_cache=False,
+    split_on_hyphen=True,
+    trim_symbols="?",
+  )
+
+  clear_cache()
+  assert result == ("aa", " ", "AA", " ", "ab", " ", "AA", "-", "aa", "?")
+
+
+def test_sentence2pronunciation_cached__ignore_case__ignores_case():
+  result = sentence2pronunciation_cached(
+    sentence=tuple("a A /ab/ A-a?"),
+    annotation_split_symbol="/",
+    consider_annotation=True,
+    get_pronunciation=lambda pronunciation: tuple([pronunciation[0] + pronunciation[0]]),
+    ignore_case_in_cache=True,
+    split_on_hyphen=True,
+    trim_symbols="?",
+  )
+
+  clear_cache()
+  assert result == ("aa", " ", "aa", " ", "ab", " ", "aa", "-", "aa", "?")
+
+# endregion
+
+# region word2pronunciation_cached
+
+
+def test_word2pronunciation_cached__dont_ignore_case():
+  result = word2pronunciation_cached(
+    word=tuple("?A-a?"),
+    annotation_split_symbol="/",
+    consider_annotation=True,
+    get_pronunciation=lambda pronunciation: tuple([pronunciation[0] + pronunciation[0]]),
+    ignore_case_in_cache=False,
+    split_on_hyphen=True,
+    trim_symbols="?",
+  )
+
+  clear_cache()
+  assert result == ("?", "AA", "-", "aa", "?")
+
+
+def test_word2pronunciation_cached__ignore_case__ignores_case():
+  result = word2pronunciation_cached(
+    word=tuple("?A-a?"),
+    annotation_split_symbol="/",
+    consider_annotation=True,
+    get_pronunciation=lambda pronunciation: tuple([pronunciation[0] + pronunciation[0]]),
+    ignore_case_in_cache=True,
+    split_on_hyphen=True,
+    trim_symbols="?",
+  )
+
+  clear_cache()
+  assert result == ("?", "AA", "-", "AA", "?")
 
 # endregion
 

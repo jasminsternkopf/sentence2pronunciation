@@ -1,11 +1,28 @@
-from typing import Callable, Dict, List, Optional, Set, Tuple
+from functools import partial
+from typing import Callable, List, Optional, Set, Tuple
 
-Symbol = str
-Pronunciation = Tuple[Symbol, ...]
+from sentence2pronunciation.lookup_cache import lookup_with_cache
+from sentence2pronunciation.types import Pronunciation, Symbol
+
 HYPHEN = "-"
 
 
+def sentence2pronunciation_cached(sentence: Pronunciation, trim_symbols: Set[Symbol], split_on_hyphen: bool, get_pronunciation: Callable[[Pronunciation], Pronunciation], consider_annotation: bool, annotation_split_symbol: Optional[Symbol], ignore_case_in_cache: bool) -> Pronunciation:
+  method = partial(lookup_with_cache, get_pronunciation=get_pronunciation,
+                   ignore_case=ignore_case_in_cache)
+  result = sentence2pronunciation(
+    sentence=sentence,
+    annotation_split_symbol=annotation_split_symbol,
+    consider_annotation=consider_annotation,
+    get_pronunciation=method,
+    split_on_hyphen=split_on_hyphen,
+    trim_symbols=trim_symbols,
+  )
+  return result
+
+
 def sentence2pronunciation(sentence: Pronunciation, trim_symbols: Set[Symbol], split_on_hyphen: bool, get_pronunciation: Callable[[Pronunciation], Pronunciation], consider_annotation: bool, annotation_split_symbol: Optional[Symbol]) -> Pronunciation:
+  assert isinstance(sentence, tuple)
   if consider_annotation and len(annotation_split_symbol) != 1:
     raise ValueError("annotation_split_symbol has to be a string of length 1.")
   words = split_pronunciation_on_symbol(sentence, " ")
@@ -23,6 +40,20 @@ def symbols_join(list_of_pronunciations: List[Pronunciation], join_symbol: Symbo
     if not is_last_word:
       res.append(join_symbol)
   return tuple(res)
+
+
+def word2pronunciation_cached(word: Pronunciation, trim_symbols: Set[Symbol], split_on_hyphen: bool, get_pronunciation: Callable[[Pronunciation], Pronunciation], consider_annotation: bool, annotation_split_symbol: Optional[Symbol], ignore_case_in_cache: bool) -> Pronunciation:
+  method = partial(lookup_with_cache, get_pronunciation=get_pronunciation,
+                   ignore_case=ignore_case_in_cache)
+  result = word2pronunciation(
+    word=word,
+    annotation_split_symbol=annotation_split_symbol,
+    consider_annotation=consider_annotation,
+    get_pronunciation=method,
+    split_on_hyphen=split_on_hyphen,
+    trim_symbols=trim_symbols,
+  )
+  return result
 
 
 def word2pronunciation(word: Pronunciation, trim_symbols: Set[Symbol], split_on_hyphen: bool, get_pronunciation: Callable[[Pronunciation], Pronunciation], consider_annotation: bool, annotation_split_symbol: Optional[Symbol]) -> Pronunciation:
