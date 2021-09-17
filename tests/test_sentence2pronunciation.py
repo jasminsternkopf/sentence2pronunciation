@@ -111,11 +111,11 @@ def test_symbols_join():
 # region pronunciation_list_to_pronunciation
 
 
-def test_pronunciation_list_to_pronunciation():
+def test_pronunciation_list_to_pronunciation__does_not_remove_empty_entries():
   p = [("a",), ("bc", "d"), ("efg",), ("",), ("hi", "")]
   res = pronunciation_list_to_pronunciation(p)
 
-  assert res == ("a", "bc", "d", "efg", "hi")
+  assert res == ("a", "bc", "d", "efg", "", "hi", "")
 
 
 def test_pronunciation_list_to_pronunciation__empty_list():
@@ -199,6 +199,16 @@ def test_remove_trim_symbols_at_end__word_is_empty():
 # endregion
 
 # region trim_word
+
+
+def test_trim_word__only_trim_symbol():
+  word = ("!",)
+  trim_symbols = {"!"}
+  res_1, res_2, res_3 = trim_word(word, trim_symbols)
+
+  assert res_1 == ("!",)
+  assert res_2 == ()
+  assert res_3 == ()
 
 
 def test_trim_word():
@@ -408,6 +418,50 @@ def test_not_annotation_word2pronunciation():
   assert res == ("!", "(", "hel", "lo", "(", "!")
 
 
+def test_not_annotation_word2pronunciation__no_begin_trim():
+  res = not_annotation_word2pronunciation(
+    word=("a", "!"),
+    trim_symbols={"!"},
+    split_on_hyphen=False,
+    get_pronunciation=lambda _: ("x",),
+  )
+
+  assert res == ("x", "!")
+
+
+def test_not_annotation_word2pronunciation__no_end_trim():
+  res = not_annotation_word2pronunciation(
+    word=("!", "a"),
+    trim_symbols={"!"},
+    split_on_hyphen=False,
+    get_pronunciation=lambda _: ("x",),
+  )
+
+  assert res == ("!", "x")
+
+
+def test_not_annotation_word2pronunciation__no_begin_and_no_end_trim():
+  res = not_annotation_word2pronunciation(
+    word=("a",),
+    trim_symbols={"!"},
+    split_on_hyphen=False,
+    get_pronunciation=lambda _: ("x",),
+  )
+
+  assert res == ("x",)
+
+
+def test_not_annotation_word2pronunciation__only_trim():
+  res = not_annotation_word2pronunciation(
+    word=("!",),
+    trim_symbols={"!"},
+    split_on_hyphen=False,
+    get_pronunciation=lambda _: ("x",),
+  )
+
+  assert res == ("!",)
+
+
 # endregion
 
 # region word2pronunciation
@@ -542,6 +596,19 @@ def test_word2pronunciation_cached__ignore_case__ignores_case():
 # endregion
 
 # region sentence2pronunciation
+
+
+def test_sentence2pronunciation__spare_split_symbol__does_not_trigger_get_pronunciation():
+  result = sentence2pronunciation(
+    sentence=("w", " ", "?"),
+    trim_symbols={"?"},
+    split_on_hyphen=False,
+    consider_annotation=False,
+    annotation_split_symbol=None,
+    get_pronunciation=lambda _: ("x",),
+  )
+
+  assert result == ("x", " ", "?")
 
 
 def test_sentence2pronunciation__consider_annotation_is_true__annotation_split_symbol_has_len_2():

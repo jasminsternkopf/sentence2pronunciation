@@ -97,10 +97,15 @@ def get_annotation_content(annotation: Pronunciation, annotation_split_symbol: S
 
 def not_annotation_word2pronunciation(word: Pronunciation, trim_symbols: Set[Symbol], split_on_hyphen: bool, get_pronunciation: Callable[[Pronunciation], Pronunciation]) -> Pronunciation:
   trim_beginning, actual_word, trim_end = trim_word(word, trim_symbols)
-  pronunciations = [trim_beginning]
-  actual_pronunciation = add_pronunciation_for_word(actual_word, split_on_hyphen, get_pronunciation)
-  pronunciations.append(actual_pronunciation)
-  pronunciations.append(trim_end)
+  pronunciations = []
+  if len(trim_beginning) > 0:
+    pronunciations.append(trim_beginning)
+  if len(actual_word) > 0:
+    actual_pronunciation = add_pronunciation_for_word(
+      actual_word, split_on_hyphen, get_pronunciation)
+    pronunciations.append(actual_pronunciation)
+  if len(trim_end) > 0:
+    pronunciations.append(trim_end)
   complete_pronunciation = pronunciation_list_to_pronunciation(pronunciations)
   return complete_pronunciation
 
@@ -162,5 +167,5 @@ def pronunciation_list_to_pronunciation(pronunciation_list: List[Pronunciation])
   for element in pronunciation_list:
     assert isinstance(element, tuple)
   flattened_pronunciation_list = tuple(
-    pronunciation for pronunciation_tuple in pronunciation_list for pronunciation in pronunciation_tuple if pronunciation != "")
+    pronunciation for pronunciation_tuple in pronunciation_list for pronunciation in pronunciation_tuple)
   return flattened_pronunciation_list
