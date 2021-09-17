@@ -6,12 +6,12 @@ name = "pypi"
 [packages]
 
 [dev-packages]
+sentence2pronunciation = {editable = true, path = "."}
 autopep8 = "*"
 pylint = "*"
 pycodestyle = "*"
 isort = "*"
 pytest = "*"
-sentence2pronunciation = {editable = true, path = "."}
 
 [requires]
 python_version = "3.8"
