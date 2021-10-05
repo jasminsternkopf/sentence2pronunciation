@@ -1,10 +1,33 @@
 from functools import partial
 from typing import Callable, List, Optional, Set, Tuple
 
-from sentence2pronunciation.lookup_cache import lookup_with_cache
+from sentence2pronunciation.lookup_cache import (lookup_with_cache,
+                                                 pronunciation_upper)
 from sentence2pronunciation.types import Pronunciation, Symbol
 
 HYPHEN = "-"
+
+
+def add_to_words_method(x: Pronunciation, words: Set[Pronunciation], ignore_case: bool):
+  word = x
+  if ignore_case:
+    word = pronunciation_upper(word)
+  words.add(word)
+  return word
+
+
+def get_non_annotated_words(sentence: Pronunciation, trim_symbols: Set[Symbol], split_on_hyphen: bool, consider_annotation: bool, annotation_split_symbol: Optional[Symbol], ignore_case: bool) -> Set[Pronunciation]:
+  words: Set[Pronunciation] = set()
+  get_pronunciation_proxy = partial(add_to_words_method, words=words, ignore_case=ignore_case)
+  sentence2pronunciation(
+    sentence=sentence,
+    trim_symbols=trim_symbols,
+    split_on_hyphen=split_on_hyphen,
+    consider_annotation=consider_annotation,
+    annotation_split_symbol=annotation_split_symbol,
+    get_pronunciation=get_pronunciation_proxy,
+  )
+  return words
 
 
 def sentence2pronunciation_cached(sentence: Pronunciation, trim_symbols: Set[Symbol], split_on_hyphen: bool, get_pronunciation: Callable[[Pronunciation], Pronunciation], consider_annotation: bool, annotation_split_symbol: Optional[Symbol], ignore_case_in_cache: bool) -> Pronunciation:

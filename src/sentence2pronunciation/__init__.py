@@ -1,4 +1,5 @@
-from sentence2pronunciation.core import (sentence2pronunciation,
+from sentence2pronunciation.core import (get_non_annotated_words,
+                                         sentence2pronunciation,
                                          sentence2pronunciation_cached,
                                          word2pronunciation,
                                          word2pronunciation_cached)

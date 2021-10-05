@@ -2,7 +2,9 @@ import pytest
 from sentence2pronunciation.core import (add_pronunciation_for_splitted_word,
                                          add_pronunciation_for_word,
                                          annotation2pronunciation,
-                                         get_annotation_content, is_annotation,
+                                         get_annotation_content,
+                                         get_non_annotated_words,
+                                         is_annotation,
                                          not_annotation_word2pronunciation,
                                          pronunciation_list_to_pronunciation,
                                          remove_trim_symbols_at_beginning,
@@ -700,3 +702,23 @@ def test_sentence2pronunciation__one_word_and_one_annotation_separate_symbols():
   assert res == ("hello", " ", "world")
 
 # endregion
+
+
+def test_get_non_annotated_words():
+  result = get_non_annotated_words(
+    sentence=tuple("hello /test/ this! is-a !teest This"),
+    consider_annotation=True,
+    ignore_case=False,
+    split_on_hyphen=True,
+    trim_symbols={"!"},
+    annotation_split_symbol="/",
+  )
+
+  assert result == {
+    tuple("hello"),
+    tuple("this"),
+    tuple("is"),
+    tuple("a"),
+    tuple("teest"),
+    tuple("This"),
+  }
