@@ -25,6 +25,11 @@ def pronunciation_upper(pronunciation: Pronunciation) -> Pronunciation:
   return result
 
 
+def pronunciation_lower(pronunciation: Pronunciation) -> Pronunciation:
+  result = tuple(symbol.lower() for symbol in pronunciation)
+  return result
+
+
 def lookup_with_cache(word: Pronunciation, get_pronunciation: Callable[[Pronunciation], Pronunciation], ignore_case: bool) -> Pronunciation:
   cache = get_cache()
   cache_key = pronunciation_upper(word) if ignore_case else word
