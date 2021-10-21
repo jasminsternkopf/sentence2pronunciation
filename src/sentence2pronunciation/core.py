@@ -141,7 +141,8 @@ def add_pronunciation_for_word(word: Pronunciation, split_on_hyphen: bool, get_p
 
 def add_pronunciation_for_splitted_word(word: Pronunciation, get_pronunciation: Callable[[Pronunciation], Pronunciation]) -> Pronunciation:
   splitted_words = split_pronunciation_on_symbol(word, HYPHEN)
-  pronunciations = [get_pronunciation(single_word) for single_word in splitted_words]
+  pronunciations = [get_pronunciation(single_word) if single_word != () else ()
+                    for single_word in splitted_words]
   pronunciations_with_hyphens = symbols_join(pronunciations, HYPHEN)
   return pronunciations_with_hyphens
 

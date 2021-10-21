@@ -384,6 +384,13 @@ def test_add_pronunciation_for_splitted_word__double_hyphen_at_end():
 
   assert res == word
 
+
+def test_add_pronunciation_for_splitted_word__only_double_hyphen():
+  word = (HYPHEN, HYPHEN)
+  res = add_pronunciation_for_splitted_word(word, lambda word: "a")
+
+  assert res == word
+
 # endregion
 
 
