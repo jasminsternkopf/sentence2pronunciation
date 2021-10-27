@@ -1,8 +1,17 @@
+import time
+from concurrent.futures.process import ProcessPoolExecutor
 from functools import partial
-from typing import Callable, List, Optional, Set, Tuple
+from multiprocessing import Manager
+from multiprocessing.managers import SyncManager
+from typing import (Any, Callable, Dict, Iterable, List, Optional, Set, Tuple,
+                    cast)
 
-from sentence2pronunciation.lookup_cache import (lookup_with_cache,
-                                                 pronunciation_upper)
+from tqdm import tqdm
+
+from sentence2pronunciation.lookup_cache import (
+    LookupCache, get_pronunciation_to_word, lookup_in_cache,
+    lookup_in_cache_and_add_if_missing,
+    pronunciation_upper)
 from sentence2pronunciation.types import Pronunciation, Symbol
 
 HYPHEN = "-"
@@ -30,9 +39,70 @@ def get_non_annotated_words(sentence: Pronunciation, trim_symbols: Set[Symbol], 
   return words
 
 
-def sentence2pronunciation_cached(sentence: Pronunciation, trim_symbols: Set[Symbol], split_on_hyphen: bool, get_pronunciation: Callable[[Pronunciation], Pronunciation], consider_annotation: bool, annotation_split_symbol: Optional[Symbol], ignore_case_in_cache: bool) -> Pronunciation:
-  method = partial(lookup_with_cache, get_pronunciation=get_pronunciation,
-                   ignore_case=ignore_case_in_cache)
+def return_input_too(inp: Any, method: Callable[[Any], Any]) -> Tuple[Any, Any]:
+  return inp, method(inp)
+
+
+def prepare_cache_mp(sentences: Set[Pronunciation], trim_symbols: Set[Symbol], split_on_hyphen: bool, consider_annotation: bool, annotation_split_symbol: Optional[Symbol], get_pronunciation: Callable[[Pronunciation], Pronunciation], ignore_case: bool, n_jobs: int, chunksize: int) -> LookupCache:
+  unique_words = {
+    word for sentence in sentences
+    for word in split_pronunciation_on_symbol(sentence, " ")
+  }
+
+  if ignore_case:
+    unique_words = {
+      word if consider_annotation and is_annotation(
+        word, annotation_split_symbol) else pronunciation_upper(word)
+      for word in unique_words
+    }
+
+  method = partial(word2pronunciation,
+                   get_pronunciation=get_pronunciation,
+                   trim_symbols=trim_symbols,
+                   split_on_hyphen=split_on_hyphen,
+                   consider_annotation=consider_annotation,
+                   annotation_split_symbol=annotation_split_symbol,
+                   )
+  mp_method = partial(return_input_too, method=method)
+
+  with ProcessPoolExecutor(max_workers=n_jobs) as ex:
+    pronunciations_to_words: LookupCache = dict(
+      tqdm(ex.map(mp_method, unique_words, chunksize=chunksize), total=len(unique_words)))
+
+  return pronunciations_to_words
+
+
+def sentences2pronunciations_from_cache_mp(sentences: Set[Pronunciation], ignore_case: bool, consider_annotation: bool, annotation_split_symbol: Optional[Symbol], cache: LookupCache, n_jobs: int, chunksize: int) -> Dict[Pronunciation, Pronunciation]:
+
+  method = partial(sentence2pronunciation_from_cache,
+                   ignore_case=ignore_case, cache=cache,
+                   consider_annotation=consider_annotation, annotation_split_symbol=annotation_split_symbol)
+  mp_method = partial(return_input_too, method=method)
+
+  with ProcessPoolExecutor(max_workers=n_jobs) as ex:
+    pronunciations_to_sentences: Dict[Pronunciation, Pronunciation] = dict(
+      tqdm(ex.map(mp_method, sentences, chunksize=chunksize), total=len(sentences)))
+  return pronunciations_to_sentences
+
+
+def sentence2pronunciation_from_cache(sentence: Pronunciation, consider_annotation: bool, annotation_split_symbol: Optional[Symbol], ignore_case: bool, cache: LookupCache) -> Pronunciation:
+  words = split_pronunciation_on_symbol(sentence, " ")
+  pronunciations = []
+  for word in words:
+    if ignore_case:
+      if consider_annotation and is_annotation(word, annotation_split_symbol):
+        pass
+      else:
+        word = pronunciation_upper(word)
+    word_pron = lookup_in_cache(word, cache)
+    pronunciations.append(word_pron)
+  complete_pronunciation = symbols_join(pronunciations, " ")
+  return complete_pronunciation
+
+
+def sentence2pronunciation_cached(sentence: Pronunciation, trim_symbols: Set[Symbol], split_on_hyphen: bool, get_pronunciation: Callable[[Pronunciation], Pronunciation], consider_annotation: bool, annotation_split_symbol: Optional[Symbol], ignore_case_in_cache: bool, cache: LookupCache) -> Pronunciation:
+  method = partial(lookup_in_cache_and_add_if_missing, get_pronunciation=get_pronunciation,
+                   ignore_case=ignore_case_in_cache, cache=cache)
   result = sentence2pronunciation(
     sentence=sentence,
     annotation_split_symbol=annotation_split_symbol,
@@ -65,9 +135,9 @@ def symbols_join(list_of_pronunciations: List[Pronunciation], join_symbol: Symbo
   return tuple(res)
 
 
-def word2pronunciation_cached(word: Pronunciation, trim_symbols: Set[Symbol], split_on_hyphen: bool, get_pronunciation: Callable[[Pronunciation], Pronunciation], consider_annotation: bool, annotation_split_symbol: Optional[Symbol], ignore_case_in_cache: bool) -> Pronunciation:
-  method = partial(lookup_with_cache, get_pronunciation=get_pronunciation,
-                   ignore_case=ignore_case_in_cache)
+def word2pronunciation_cached(word: Pronunciation, trim_symbols: Set[Symbol], split_on_hyphen: bool, get_pronunciation: Callable[[Pronunciation], Pronunciation], consider_annotation: bool, annotation_split_symbol: Optional[Symbol], ignore_case_in_cache: bool, cache: LookupCache) -> Pronunciation:
+  method = partial(lookup_in_cache_and_add_if_missing, get_pronunciation=get_pronunciation,
+                   ignore_case=ignore_case_in_cache, cache=cache)
   result = word2pronunciation(
     word=word,
     annotation_split_symbol=annotation_split_symbol,
