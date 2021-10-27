@@ -1,6 +1,7 @@
 import time
 from concurrent.futures.process import ProcessPoolExecutor
 from functools import partial
+from logging import getLogger
 from multiprocessing import Manager
 from multiprocessing.managers import SyncManager
 from typing import (Any, Callable, Dict, Iterable, List, Optional, Set, Tuple,
@@ -10,8 +11,7 @@ from tqdm import tqdm
 
 from sentence2pronunciation.lookup_cache import (
     LookupCache, get_pronunciation_to_word, lookup_in_cache,
-    lookup_in_cache_and_add_if_missing,
-    pronunciation_upper)
+    lookup_in_cache_and_add_if_missing, pronunciation_upper)
 from sentence2pronunciation.types import Pronunciation, Symbol
 
 HYPHEN = "-"
@@ -44,18 +44,29 @@ def return_input_too(inp: Any, method: Callable[[Any], Any]) -> Tuple[Any, Any]:
 
 
 def prepare_cache_mp(sentences: Set[Pronunciation], trim_symbols: Set[Symbol], split_on_hyphen: bool, consider_annotation: bool, annotation_split_symbol: Optional[Symbol], get_pronunciation: Callable[[Pronunciation], Pronunciation], ignore_case: bool, n_jobs: int, chunksize: int) -> LookupCache:
+  logger = getLogger(__name__)
+
+  logger.info("Getting all words...")
   unique_words = {
-    word for sentence in sentences
+    word for sentence in tqdm(sentences)
     for word in split_pronunciation_on_symbol(sentence, " ")
   }
+  logger.info("Done.")
 
   if ignore_case:
-    unique_words = {
-      word if consider_annotation and is_annotation(
-        word, annotation_split_symbol) else pronunciation_upper(word)
-      for word in unique_words
-    }
+    logger.info("Ignoring case...")
+    if consider_annotation:
+      unique_words = {
+          word if is_annotation(
+              word, annotation_split_symbol) else pronunciation_upper(word)
+          for word in tqdm(unique_words)
+      }
+    else:
+      unique_words = {pronunciation_upper(word) for word in tqdm(unique_words)}
 
+    logger.info("Done.")
+
+  logger.info("Getting pronunciations...")
   method = partial(word2pronunciation,
                    get_pronunciation=get_pronunciation,
                    trim_symbols=trim_symbols,
@@ -68,12 +79,12 @@ def prepare_cache_mp(sentences: Set[Pronunciation], trim_symbols: Set[Symbol], s
   with ProcessPoolExecutor(max_workers=n_jobs) as ex:
     pronunciations_to_words: LookupCache = dict(
       tqdm(ex.map(mp_method, unique_words, chunksize=chunksize), total=len(unique_words)))
+  logger.info("Done.")
 
   return pronunciations_to_words
 
 
 def sentences2pronunciations_from_cache_mp(sentences: Set[Pronunciation], ignore_case: bool, consider_annotation: bool, annotation_split_symbol: Optional[Symbol], cache: LookupCache, n_jobs: int, chunksize: int) -> Dict[Pronunciation, Pronunciation]:
-
   method = partial(sentence2pronunciation_from_cache,
                    ignore_case=ignore_case, cache=cache,
                    consider_annotation=consider_annotation, annotation_split_symbol=annotation_split_symbol)
