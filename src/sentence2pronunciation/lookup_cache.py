@@ -1,3 +1,5 @@
+import threading
+from multiprocessing.synchronize import RLock
 from typing import Callable, Dict
 
 from sentence2pronunciation.types import Pronunciation
@@ -39,3 +41,18 @@ def lookup_with_cache(word: Pronunciation, get_pronunciation: Callable[[Pronunci
   word_pronunciation = get_pronunciation(word)
   cache[cache_key] = word_pronunciation
   return word_pronunciation
+
+
+def lookup_with_cache_mp(word: Pronunciation, get_pronunciation: Callable[[Pronunciation], Pronunciation], ignore_case: bool, lock: RLock, cache: Dict[Pronunciation, Pronunciation]) -> Pronunciation:
+  cache_key = pronunciation_upper(word) if ignore_case else word
+  pronunciation = None
+  with lock:
+    print([''.join(key) for key in cache.keys()])
+    if cache_key not in cache:
+      pronunciation = get_pronunciation(word)
+      cache[cache_key] = pronunciation
+
+  pronunciation_was_not_added = pronunciation is None
+  if pronunciation_was_not_added:
+    pronunciation = cache[cache_key]
+  return pronunciation
