@@ -56,6 +56,7 @@ def prepare_cache_mp(sentences: Set[Pronunciation], trim_symbols: Set[Symbol], s
   if ignore_case:
     logger.info("Ignoring case...")
     if consider_annotation:
+      # Note: annotations will be taken as they are, i.e. no upper case since it is not clear which of the annotation will be taken as value later in the cache (if multiple keys merge to one due to upper case).
       unique_words = {
           word if is_annotation(
               word, annotation_split_symbol) else pronunciation_upper(word)
