@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 tqdm = "*"
+ordered-set = "*"
 
 [dev-packages]
 sentence2pronunciation = {editable = true, path = "."}

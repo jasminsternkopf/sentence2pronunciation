@@ -1,13 +1,20 @@
 import pytest
-from sentence2pronunciation.core import (
-    add_pronunciation_for_splitted_word, add_pronunciation_for_word,
-    annotation2pronunciation, get_annotation_content, get_non_annotated_words,
-    is_annotation, not_annotation_word2pronunciation, prepare_cache_mp,
-    pronunciation_list_to_pronunciation, remove_trim_symbols_at_beginning,
-    remove_trim_symbols_at_end, sentence2pronunciation,
-    sentence2pronunciation_cached, sentences2pronunciations_from_cache_mp,
-    split_pronunciation_on_symbol, symbols_join, trim_word, word2pronunciation,
-    word2pronunciation_cached)
+from sentence2pronunciation.core import (add_pronunciation_for_splitted_word,
+                                         add_pronunciation_for_word,
+                                         annotation2pronunciation,
+                                         get_annotation_content,
+                                         get_non_annotated_words,
+                                         is_annotation,
+                                         not_annotation_word2pronunciation,
+                                         pronunciation_list_to_pronunciation,
+                                         remove_trim_symbols_at_beginning,
+                                         remove_trim_symbols_at_end,
+                                         sentence2pronunciation,
+                                         sentence2pronunciation_cached,
+                                         split_pronunciation_on_symbol,
+                                         symbols_join, trim_word,
+                                         word2pronunciation,
+                                         word2pronunciation_cached)
 from sentence2pronunciation.lookup_cache import get_empty_cache
 from sentence2pronunciation.types import Pronunciation
 
@@ -19,68 +26,8 @@ def get_pronunciation(x: Pronunciation):
   return x
 
 
-def get_pronunciation_added_X(x: Pronunciation):
-  assert isinstance(x, tuple)
-  return tuple(list(x) + ["X"])
-
-
 HELLO_DICT = {("hel", HYPHEN, "lo"): ("hel", "hyphen", "lo"), ("hel",): ("hel",),
               ("lo",): ("lo",), ("hel", "lo",): ("hel", "lo"), ("hello", ): ("hello", )}
-
-
-def test_prepare_cache_mp():
-  cache = prepare_cache_mp(
-    sentences={
-      tuple("This is-a, test."),
-      tuple("This is /another/ Test."),
-    },
-    annotation_split_symbol="/",
-    consider_annotation=True,
-    get_pronunciation=get_pronunciation_added_X,
-    ignore_case=True,
-    n_jobs=1,
-    chunksize=1,
-    split_on_hyphen=True,
-    trim_symbols={".", ","},
-  )
-
-  assert len(cache) == 5
-  assert cache[tuple("THIS")] == tuple("THISX")
-  assert cache[tuple("IS")] == tuple("ISX")
-  assert cache[tuple("IS-A,")] == tuple("ISX-AX,")
-  assert cache[tuple("TEST.")] == tuple("TESTX.")
-  assert cache[tuple("/another/")] == ("another",)
-
-
-def test_sentences2pronunciations_from_cache_mp():
-  cache = {
-    ('/', 'a', 'n', 'o', 't', 'h', 'e', 'r', '/'): ('another',),
-    ('I', 'S'): ('I', 'S', 'X'),
-    ('I', 'S', '-', 'A', ','): ('I', 'S', 'X', '-', 'A', 'X', ','),
-    ('T', 'E', 'S', 'T', '.'): ('T', 'E', 'S', 'T', 'X', '.'),
-    ('T', 'H', 'I', 'S'): ('T', 'H', 'I', 'S', 'X')
-  }
-
-  sentences = [
-    tuple("This is-a, test."),
-    tuple("This is /another/ Test."),
-  ]
-
-  result = sentences2pronunciations_from_cache_mp(
-    sentences=set(sentences),
-    annotation_split_symbol="/",
-    consider_annotation=True,
-    ignore_case=True,
-    n_jobs=1,
-    chunksize=1,
-    cache=cache,
-  )
-
-  assert len(result) == 2
-  assert result[sentences[0]] == ('T', 'H', 'I', 'S', 'X', ' ', 'I', 'S', 'X', '-',
-                                  'A', 'X', ',', ' ', 'T', 'E', 'S', 'T', 'X', '.')
-  assert result[sentences[1]] == ('T', 'H', 'I', 'S', 'X', ' ', 'I', 'S', 'X', ' ',
-                                  'another', ' ', 'T', 'E', 'S', 'T', 'X', '.')
 
 
 def get_pronunciation_with_dict(word, dictionary=HELLO_DICT):
