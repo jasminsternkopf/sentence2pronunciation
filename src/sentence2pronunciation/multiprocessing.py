@@ -124,7 +124,6 @@ def __init_pool_sentences2pronunciations_from_cache_mp(cache: LookupCache, sente
 
 def sentences2pronunciations_from_cache_mp(sentences: Set[Pronunciation], ignore_case: bool, consider_annotation: bool, annotation_split_symbol: Optional[Symbol], cache: LookupCache, n_jobs: int, chunksize: int, maxtasksperchild: Optional[int] = None) -> Dict[Pronunciation, Pronunciation]:
   logger = getLogger(__name__)
-  logger.info("Getting pronunciations from preparation...")
   method_proxy = partial(
     __main_sentences2pronunciations_from_cache_mp,
     ignore_case=ignore_case,
@@ -132,8 +131,11 @@ def sentences2pronunciations_from_cache_mp(sentences: Set[Pronunciation], ignore
     annotation_split_symbol=annotation_split_symbol
   )
 
+  logger.info("Preparing sentences...")
   sentences_with_order = OrderedSet(sentences)
+  logger.info("Done.")
 
+  logger.info("Getting pronunciations from preparation...")
   with Pool(
     processes=n_jobs,
     initializer=__init_pool_sentences2pronunciations_from_cache_mp,
@@ -144,7 +146,6 @@ def sentences2pronunciations_from_cache_mp(sentences: Set[Pronunciation], ignore
       pool.imap_unordered(method_proxy, range(len(sentences_with_order)), chunksize=chunksize),
       total=len(sentences_with_order),
     ))
-
   logger.info("Done.")
 
   return pronunciations_to_sentences
