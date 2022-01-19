@@ -11,7 +11,7 @@ from sentence2pronunciation.core import (add_pronunciation_for_splitted_word,
                                          remove_trim_symbols_at_end,
                                          sentence2pronunciation,
                                          sentence2pronunciation_cached,
-                                         split_pronunciation_on_symbol,
+                                         symbols_split_iterable,
                                          symbols_join, trim_word,
                                          word2pronunciation,
                                          word2pronunciation_cached)
@@ -299,42 +299,42 @@ def test_annotation2pronunciation__one_element_consists_of_annotation_split_symb
 
 def test_split_pronunciation_on_symbol__hyphen_only_in_middle_and_not_double():
   word = ("ab", "c", HYPHEN, "d", "e")
-  res = split_pronunciation_on_symbol(word, HYPHEN)
+  res = list(symbols_split_iterable(word, HYPHEN))
 
   assert res == [("ab", "c"), ("d", "e")]
 
 
 def test_split_pronunciation_on_symbol__double_hyphen_in_middle():
   word = ("ab", "c", HYPHEN, HYPHEN, "d", "e")
-  res = split_pronunciation_on_symbol(word, HYPHEN)
+  res = list(symbols_split_iterable(word, HYPHEN))
 
   assert res == [("ab", "c"), (), ("d", "e")]
 
 
 def test_split_pronunciation_on_symbol__hyphen_at_beginning():
   word = (HYPHEN, "ab", "c")
-  res = split_pronunciation_on_symbol(word, HYPHEN)
+  res = list(symbols_split_iterable(word, HYPHEN))
 
   assert res == [(), ("ab", "c")]
 
 
 def test_split_pronunciation_on_symbol__double_hyphen_at_beginning():
   word = (HYPHEN, HYPHEN, "ab", "c")
-  res = split_pronunciation_on_symbol(word, HYPHEN)
+  res = list(symbols_split_iterable(word, HYPHEN))
 
   assert res == [(), (), ("ab", "c")]
 
 
 def test_split_pronunciation_on_symbol__hyphen_at_end():
   word = ("f", HYPHEN,)
-  res = split_pronunciation_on_symbol(word, HYPHEN)
+  res = list(symbols_split_iterable(word, HYPHEN))
 
   assert res == [("f",), ()]
 
 
 def test_split_pronunciation_on_symbol__double_hyphen_at_end():
   word = ("f", HYPHEN, HYPHEN,)
-  res = split_pronunciation_on_symbol(word, HYPHEN)
+  res = list(symbols_split_iterable(word, HYPHEN))
 
   assert res == [("f",), (), ()]
 

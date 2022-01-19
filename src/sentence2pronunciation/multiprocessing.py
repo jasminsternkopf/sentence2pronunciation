@@ -6,9 +6,9 @@ from typing import Any, Callable, Dict, Optional, Set, Tuple
 from ordered_set import OrderedSet
 from tqdm import tqdm
 
-from sentence2pronunciation.core import (is_annotation,
+from sentence2pronunciation.core import (get_words_from_sentence, get_words_from_sentences, is_annotation,
                                          sentence2pronunciation_from_cache,
-                                         split_pronunciation_on_symbol,
+                                         symbols_split_iterable,
                                          word2pronunciation)
 from sentence2pronunciation.lookup_cache import (LookupCache,
                                                  pronunciation_upper)
@@ -46,10 +46,7 @@ def prepare_cache_mp(sentences: Set[Pronunciation], trim_symbols: Set[Symbol], s
   logger = getLogger(__name__)
 
   logger.info("Getting all words...")
-  unique_words = OrderedSet({
-    word for sentence in tqdm(sentences)
-    for word in split_pronunciation_on_symbol(sentence, " ")
-  })
+  unique_words = get_words_from_sentences(tqdm(sentences))
   logger.info("Done.")
 
   if ignore_case:
